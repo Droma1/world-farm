@@ -1,3 +1,90 @@
-# Godot 4+ specific ignores
+# =====================================================================
+#  worldFarm — .gitignore
+#  Cobertura: Godot 4, C# (Mono/.NET), Windows, IDEs, builds, secretos.
+#  Nota: en Godot 4 los archivos *.import SÍ se comitean (uno por asset).
+#  Solo se ignora la carpeta .godot/ que es caché regenerable.
+# =====================================================================
+
+# ---------- Godot 4 ----------
 .godot/
+# Exports / android wrapper / iOS wrapper si se generan
 /android/
+/ios/
+/web/
+/builds/
+/exports/
+/dist/
+
+# Credenciales de export (keystores, passwords) — NUNCA comitear
+export_credentials.cfg
+
+# Traducciones generadas (los .po sí se comitean, los .translation no)
+*.translation
+
+# ---------- C# / .NET (cuando se use) ----------
+.mono/
+/bin/
+/obj/
+*.csproj.user
+*.sln.docstates
+*.suo
+*.user
+*.userprefs
+
+# ---------- Tests (gdUnit4 / reports) ----------
+/reports/
+/test_output/
+
+# ---------- Logs y crash dumps ----------
+logs/
+*.log
+*.dmp
+crash.log
+
+# ---------- Secretos / variables de entorno ----------
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+secrets.json
+
+# ---------- IDEs / editores ----------
+.vscode/
+.vs/
+.idea/
+
+# ---------- Claude Code (settings locales del usuario) ----------
+.claude/settings.local.json
+*.swp
+*.swo
+*.bak
+*.tmp
+*.temp
+*~
+
+# ---------- Sistema operativo ----------
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+.fuse_hidden*
+.Trash-*
+
+# ---------- Blender / DCC tools (autosaves de assets) ----------
+*.blend1
+*.blend2
+*.blend@
