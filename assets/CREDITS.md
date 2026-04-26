@@ -14,6 +14,7 @@ URL: <https://polyhaven.com/textures>
 | `wall_diff.jpg` + `wall_nor.jpg` | `concrete_wall_007` | Muros y pilares |
 | `wood_diff.jpg` + `wood_nor.jpg` | `wood_planks` | Cajas de cobertura, laberinto |
 | `metal_diff.jpg` + `metal_nor.jpg` | `metal_plate` | Plataformas, cajones cargo |
+| `fur_diff.jpg` + `fur_nor.jpg` | `leather_white` | Pelaje del Player capibara (tinteado) |
 
 Resolución 1K (1024×1024). Cada textura tiene su **normal map** (`_nor_gl`) para
 PBR real (relieves visibles según iluminación). Aplicadas con triplanar mapping
@@ -61,3 +62,7 @@ Todo Kenney, CC0 1.0.
 2. Añadir entrada a esta tabla con fuente + URL + licencia.
 3. Si la licencia exige attribution (CC-BY), incluir el nombre del autor.
 4. Para binarios grandes (>1 MB), considerar Git LFS.
+
+> Para una **lista completa de fuentes recomendadas** (Poly Haven,
+> AmbientCG, Kenney, Quaternius, Mixamo, Sonniss, etc.) con notas de uso,
+> ver [`docs/ASSET_SOURCES.md`](../docs/ASSET_SOURCES.md).

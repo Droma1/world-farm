@@ -20,5 +20,9 @@ signal wave_completed(index: int)
 signal wave_alive_count_changed(count: int)
 signal all_waves_completed
 
-# --- Inventory / pickups (uso futuro) ---
+# --- Inventory / pickups ---
 signal item_picked_up(item: Resource, picker: Node)
+signal pickup_collected(kind: StringName, amount: float)
+
+# --- Score / kill streak ---
+signal kill_streak_changed(streak: int, multiplier: float)

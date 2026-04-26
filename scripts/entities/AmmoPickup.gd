@@ -8,3 +8,4 @@ func _apply_to_player(player: Player) -> void:
 	if player.weapon:
 		player.weapon.reserve += reserve_amount
 		player.weapon.ammo_changed.emit(player.weapon.in_mag, player.weapon.reserve)
+	EventBus.pickup_collected.emit(&"ammo", float(reserve_amount))

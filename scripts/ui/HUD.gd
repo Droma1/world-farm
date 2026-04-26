@@ -15,8 +15,10 @@ extends CanvasLayer
 @onready var end_title: Label = $Root/EndOverlay/EndTitle
 @onready var end_hint: Label = $Root/EndOverlay/EndHint
 @onready var score_label: Label = $Root/ScorePanel/ScoreLabel
+@onready var streak_label: Label = $Root/ScorePanel/StreakLabel
 
 @onready var hit_marker: Control = $Root/Crosshair/HitMarker
+@onready var pickup_feed: VBoxContainer = $Root/PickupFeed
 @onready var pause_menu: Control = $PauseMenu
 @onready var sens_slider: HSlider = $PauseMenu/Container/SensRow/SensSlider
 @onready var vol_slider: HSlider = $PauseMenu/Container/VolRow/VolSlider
@@ -54,7 +56,10 @@ func _ready() -> void:
 	EventBus.all_waves_completed.connect(_on_all_waves_completed)
 	EventBus.weapon_swapped.connect(_on_weapon_swapped)
 	EventBus.damage_dealt.connect(_on_damage_dealt)
+	EventBus.pickup_collected.connect(_on_pickup_collected)
+	EventBus.kill_streak_changed.connect(_on_streak_changed)
 	hit_marker.modulate.a = 0.0
+	streak_label.text = ""
 
 	if GameState.local_player is Player:
 		_bind(GameState.local_player)
@@ -63,12 +68,14 @@ func _ready() -> void:
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed:
 		var k := event as InputEventKey
-		# R en estados terminales: reload scene
-		if (GameState.mode == GameState.Mode.GAME_OVER
-				or GameState.mode == GameState.Mode.VICTORY) and k.keycode == KEY_R:
+		var terminal := (GameState.mode == GameState.Mode.GAME_OVER
+				or GameState.mode == GameState.Mode.VICTORY)
+		if terminal and k.keycode == KEY_R:
 			get_tree().reload_current_scene()
 			get_viewport().set_input_as_handled()
-		# Esc: pause toggle (solo cuando estamos jugando o ya pausado)
+		elif terminal and k.keycode == KEY_M:
+			get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
+			get_viewport().set_input_as_handled()
 		elif k.keycode == KEY_ESCAPE and GameState.mode == GameState.Mode.PLAYING:
 			_toggle_pause()
 			get_viewport().set_input_as_handled()
@@ -176,6 +183,38 @@ func _on_damage_dealt(_target: Object, _amount: float, source: Node) -> void:
 	hit_marker.modulate.a = 1.0
 	_hit_marker_tween = create_tween()
 	_hit_marker_tween.tween_property(hit_marker, "modulate:a", 0.0, 0.18)
+
+
+func _on_streak_changed(streak: int, multiplier: float) -> void:
+	if streak < 2:
+		streak_label.text = ""
+		return
+	streak_label.text = "x%d STREAK  ×%.1f" % [streak, multiplier]
+
+
+func _on_pickup_collected(kind: StringName, amount: float) -> void:
+	var label := Label.new()
+	label.theme_override_font_sizes["font_size"] = 22
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	match kind:
+		&"health":
+			label.text = "+%d HP" % int(amount)
+			label.modulate = Color(0.4, 1.0, 0.5, 1.0)
+		&"ammo":
+			label.text = "+%d MUNICIÓN" % int(amount)
+			label.modulate = Color(1.0, 0.9, 0.3, 1.0)
+		_:
+			label.text = "+%d" % int(amount)
+			label.modulate = Color(1, 1, 1, 1)
+	pickup_feed.add_child(label)
+
+	var tween := create_tween().set_parallel(true)
+	tween.tween_interval(0.0)
+	tween.tween_property(label, "position:y", label.position.y - 30.0, 1.6)
+	tween.tween_property(label, "modulate:a", 0.0, 1.6) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN).set_delay(0.4)
+	tween.chain().tween_callback(label.queue_free)
 
 
 # ============================================================

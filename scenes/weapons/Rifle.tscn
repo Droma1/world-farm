@@ -3,20 +3,28 @@
 [ext_resource type="Texture2D" uid="uid://cctu4lkyb7g6y" path="res://assets/textures/proto/wall.png" id="TexWall"]
 
 [sub_resource type="StandardMaterial3D" id="GunMat_1"]
-albedo_color = Color(0.55, 0.55, 0.60, 1)
+diffuse_mode = 3
+specular_mode = 1
+albedo_color = Color(0.75, 0.78, 0.85, 1)
 albedo_texture = ExtResource("TexWall")
 uv1_triplanar = true
 uv1_scale = Vector3(10, 10, 10)
-metallic = 0.7
-roughness = 0.35
+metallic = 0.4
+metallic_specular = 0.6
+roughness = 0.5
+specular = 0.3
 
 [sub_resource type="StandardMaterial3D" id="GunMat_Dark"]
-albedo_color = Color(0.32, 0.32, 0.36, 1)
+diffuse_mode = 3
+specular_mode = 1
+albedo_color = Color(0.40, 0.42, 0.50, 1)
 albedo_texture = ExtResource("TexWall")
 uv1_triplanar = true
 uv1_scale = Vector3(12, 12, 12)
-metallic = 0.55
-roughness = 0.5
+metallic = 0.3
+metallic_specular = 0.5
+roughness = 0.6
+specular = 0.25
 
 [sub_resource type="StandardMaterial3D" id="MuzzleFlashMat_1"]
 shading_mode = 0

@@ -55,7 +55,7 @@ offset_bottom = 70.0
 horizontal_alignment = 1
 theme_override_font_sizes/font_size = 22
 modulate = Color(0.85, 0.85, 0.7, 1)
-text = "R: reintentar"
+text = "R: reintentar    ·    M: menú principal"
 mouse_filter = 2
 
 [node name="Crosshair" type="Control" parent="Root"]
@@ -160,6 +160,19 @@ offset_bottom = 1.0
 color = Color(1, 0.95, 0.4, 1)
 mouse_filter = 2
 
+[node name="PickupFeed" type="VBoxContainer" parent="Root"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -150.0
+offset_top = 60.0
+offset_right = 150.0
+offset_bottom = 250.0
+alignment = 1
+theme_override_constants/separation = 6
+mouse_filter = 2
+
 [node name="ScorePanel" type="Control" parent="Root"]
 offset_left = 24.0
 offset_top = 24.0
@@ -169,10 +182,20 @@ mouse_filter = 2
 
 [node name="ScoreLabel" type="Label" parent="Root/ScorePanel"]
 anchor_right = 1.0
-anchor_bottom = 1.0
+offset_bottom = 36.0
 theme_override_font_sizes/font_size = 24
 modulate = Color(1, 0.95, 0.7, 1)
 text = "SCORE  0"
+mouse_filter = 2
+
+[node name="StreakLabel" type="Label" parent="Root/ScorePanel"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -28.0
+theme_override_font_sizes/font_size = 20
+modulate = Color(1, 0.55, 0.2, 1)
+text = ""
 mouse_filter = 2
 
 [node name="HealthPanel" type="Control" parent="Root"]

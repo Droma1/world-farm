@@ -7,3 +7,4 @@ extends Pickup
 func _apply_to_player(player: Player) -> void:
 	if player.health:
 		player.health.heal(heal_amount)
+	EventBus.pickup_collected.emit(&"health", heal_amount)

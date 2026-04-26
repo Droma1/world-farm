@@ -48,9 +48,9 @@ func _on_died() -> void:
 		ai.mark_dead()
 	if movement:
 		movement.external_wish_dir = Vector3.ZERO
-	# Score
+	# Score con kill streak multiplier
 	if data:
-		GameState.add_score(data.score_value)
+		GameState.register_kill(data.score_value)
 	# Drop posible
 	_maybe_drop_pickup()
 	EventBus.entity_died.emit(self)

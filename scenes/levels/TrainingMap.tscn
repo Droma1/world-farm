@@ -7,14 +7,6 @@
 [ext_resource type="Script" path="res://scripts/levels/TrainingMap.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/systems/spawning/WaveSystem.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/resources/WaveData.gd" id="7"]
-[ext_resource type="Texture2D" path="res://assets/textures/pbr/floor_diff.jpg" id="TexFloorD"]
-[ext_resource type="Texture2D" path="res://assets/textures/pbr/floor_nor.jpg" id="TexFloorN"]
-[ext_resource type="Texture2D" path="res://assets/textures/pbr/wall_diff.jpg" id="TexWallD"]
-[ext_resource type="Texture2D" path="res://assets/textures/pbr/wall_nor.jpg" id="TexWallN"]
-[ext_resource type="Texture2D" path="res://assets/textures/pbr/wood_diff.jpg" id="TexWoodD"]
-[ext_resource type="Texture2D" path="res://assets/textures/pbr/wood_nor.jpg" id="TexWoodN"]
-[ext_resource type="Texture2D" path="res://assets/textures/pbr/metal_diff.jpg" id="TexMetalD"]
-[ext_resource type="Texture2D" path="res://assets/textures/pbr/metal_nor.jpg" id="TexMetalN"]
 [ext_resource type="Resource" path="res://resources/enemies/grunt.tres" id="EnemyGrunt"]
 [ext_resource type="Resource" path="res://resources/enemies/heavy.tres" id="EnemyHeavy"]
 [ext_resource type="Resource" path="res://resources/enemies/sniper.tres" id="EnemySniper"]
@@ -80,99 +72,75 @@ sky_material = SubResource("SkyMat")
 background_mode = 2
 sky = SubResource("Sky")
 ambient_light_source = 3
-ambient_light_color = Color(1, 1, 1, 1)
-ambient_light_energy = 0.45
+ambient_light_color = Color(0.95, 0.95, 1, 1)
+ambient_light_energy = 0.85
 tonemap_mode = 2
-ssao_enabled = true
-ssao_radius = 1.5
+tonemap_exposure = 1.1
+ssao_enabled = false
 fog_enabled = true
-fog_light_color = Color(0.7, 0.75, 0.8, 1)
-fog_density = 0.0025
+fog_light_color = Color(0.85, 0.90, 0.95, 1)
+fog_density = 0.0015
 
 ; --- Materials ---
 [sub_resource type="StandardMaterial3D" id="FloorMat"]
-albedo_color = Color(1, 1, 1, 1)
-albedo_texture = ExtResource("TexFloorD")
-normal_enabled = true
-normal_texture = ExtResource("TexFloorN")
-normal_scale = 1.0
-uv1_triplanar = true
-uv1_scale = Vector3(0.3, 0.3, 0.3)
-roughness = 0.92
+diffuse_mode = 3
+specular_mode = 1
+albedo_color = Color(0.42, 0.55, 0.30, 1)
+roughness = 0.95
+specular = 0.1
 
 [sub_resource type="StandardMaterial3D" id="PerimeterMat"]
-albedo_color = Color(1, 1, 1, 1)
-albedo_texture = ExtResource("TexWallD")
-normal_enabled = true
-normal_texture = ExtResource("TexWallN")
-normal_scale = 1.0
-uv1_triplanar = true
-uv1_scale = Vector3(0.4, 0.4, 0.4)
-roughness = 0.85
+diffuse_mode = 3
+specular_mode = 1
+albedo_color = Color(0.92, 0.72, 0.42, 1)
+roughness = 0.92
+specular = 0.1
 
 [sub_resource type="StandardMaterial3D" id="BackstopMat"]
-albedo_color = Color(0.78, 0.74, 0.70, 1)
-albedo_texture = ExtResource("TexWallD")
-normal_enabled = true
-normal_texture = ExtResource("TexWallN")
-normal_scale = 1.0
-uv1_triplanar = true
-uv1_scale = Vector3(0.5, 0.5, 0.5)
-roughness = 0.9
+diffuse_mode = 3
+specular_mode = 1
+albedo_color = Color(0.55, 0.40, 0.28, 1)
+roughness = 0.92
+specular = 0.1
 
 [sub_resource type="StandardMaterial3D" id="CoverMat"]
-albedo_color = Color(1, 1, 1, 1)
-albedo_texture = ExtResource("TexWoodD")
-normal_enabled = true
-normal_texture = ExtResource("TexWoodN")
-normal_scale = 1.0
-uv1_triplanar = true
-uv1_scale = Vector3(0.9, 0.9, 0.9)
-roughness = 0.75
+diffuse_mode = 3
+specular_mode = 1
+albedo_color = Color(0.95, 0.55, 0.25, 1)
+roughness = 0.85
+specular = 0.1
 
 [sub_resource type="StandardMaterial3D" id="CrateMat"]
-albedo_color = Color(0.85, 0.85, 0.88, 1)
-albedo_texture = ExtResource("TexMetalD")
-normal_enabled = true
-normal_texture = ExtResource("TexMetalN")
-normal_scale = 1.0
-uv1_triplanar = true
-uv1_scale = Vector3(0.6, 0.6, 0.6)
-metallic = 0.3
-metallic_specular = 0.6
-roughness = 0.55
+diffuse_mode = 3
+specular_mode = 1
+albedo_color = Color(0.55, 0.65, 0.85, 1)
+metallic = 0.2
+metallic_specular = 0.5
+roughness = 0.5
+specular = 0.3
 
 [sub_resource type="StandardMaterial3D" id="PillarMat"]
-albedo_color = Color(1, 1, 1, 1)
-albedo_texture = ExtResource("TexWallD")
-normal_enabled = true
-normal_texture = ExtResource("TexWallN")
-normal_scale = 1.0
-uv1_triplanar = true
-uv1_scale = Vector3(0.6, 0.6, 0.6)
-roughness = 0.85
+diffuse_mode = 3
+specular_mode = 1
+albedo_color = Color(0.62, 0.62, 0.72, 1)
+roughness = 0.9
+specular = 0.1
 
 [sub_resource type="StandardMaterial3D" id="PlatformMat"]
-albedo_color = Color(1, 1, 1, 1)
-albedo_texture = ExtResource("TexMetalD")
-normal_enabled = true
-normal_texture = ExtResource("TexMetalN")
-normal_scale = 1.0
-uv1_triplanar = true
-uv1_scale = Vector3(0.5, 0.5, 0.5)
-metallic = 0.4
-metallic_specular = 0.7
+diffuse_mode = 3
+specular_mode = 1
+albedo_color = Color(0.45, 0.70, 0.92, 1)
+metallic = 0.3
+metallic_specular = 0.55
 roughness = 0.45
+specular = 0.3
 
 [sub_resource type="StandardMaterial3D" id="MazeMat"]
-albedo_color = Color(1, 1, 1, 1)
-albedo_texture = ExtResource("TexWoodD")
-normal_enabled = true
-normal_texture = ExtResource("TexWoodN")
-normal_scale = 1.0
-uv1_triplanar = true
-uv1_scale = Vector3(0.7, 0.7, 0.7)
-roughness = 0.7
+diffuse_mode = 3
+specular_mode = 1
+albedo_color = Color(0.85, 0.45, 0.20, 1)
+roughness = 0.85
+specular = 0.1
 
 [sub_resource type="StandardMaterial3D" id="TunnelMat"]
 albedo_color = Color(0.20, 0.18, 0.16, 1)

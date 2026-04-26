@@ -1,0 +1,146 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/MainMenu.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/levels/TrainingMap.tscn" id="2"]
+
+[sub_resource type="ProceduralSkyMaterial" id="MenuSky"]
+sky_top_color = Color(0.18, 0.32, 0.55, 1)
+sky_horizon_color = Color(0.85, 0.55, 0.30, 1)
+ground_bottom_color = Color(0.08, 0.10, 0.15, 1)
+ground_horizon_color = Color(0.55, 0.45, 0.40, 1)
+sun_angle_max = 30.0
+
+[node name="MainMenu" type="Control"]
+script = ExtResource("1")
+play_scene = ExtResource("2")
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="BG" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.10, 0.13, 0.20, 1)
+mouse_filter = 2
+
+[node name="Container" type="VBoxContainer" parent="."]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -220.0
+offset_right = 260.0
+offset_bottom = 220.0
+alignment = 1
+theme_override_constants/separation = 30
+
+[node name="Title" type="Label" parent="Container"]
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 72
+modulate = Color(1, 0.85, 0.50, 1)
+text = "🦫  WORLD FARM"
+
+[node name="Subtitle" type="Label" parent="Container"]
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 22
+modulate = Color(0.85, 0.85, 0.95, 0.85)
+text = "Capybara Combat Training"
+
+[node name="Spacer" type="Control" parent="Container"]
+custom_minimum_size = Vector2(0, 24)
+
+[node name="Buttons" type="VBoxContainer" parent="Container"]
+alignment = 1
+theme_override_constants/separation = 14
+
+[node name="PlayButton" type="Button" parent="Container/Buttons"]
+custom_minimum_size = Vector2(280, 54)
+text = "▶  JUGAR"
+theme_override_font_sizes/font_size = 24
+
+[node name="OptionsButton" type="Button" parent="Container/Buttons"]
+custom_minimum_size = Vector2(280, 44)
+text = "⚙   OPCIONES"
+theme_override_font_sizes/font_size = 20
+
+[node name="QuitButton" type="Button" parent="Container/Buttons"]
+custom_minimum_size = Vector2(280, 44)
+text = "✕  SALIR"
+theme_override_font_sizes/font_size = 20
+
+[node name="Hint" type="Label" parent="."]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -40.0
+offset_right = 300.0
+offset_bottom = -10.0
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+modulate = Color(0.75, 0.75, 0.85, 0.7)
+text = "WASD mover · Mouse mirar · Click disparar · R recargar · 1/2 cambiar arma · Ctrl agachar · Shift correr · Rueda zoom · Esc pausa"
+mouse_filter = 2
+
+[node name="OptionsPanel" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+visible = false
+
+[node name="BG2" type="ColorRect" parent="OptionsPanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.05, 0.07, 0.12, 0.92)
+
+[node name="Container" type="VBoxContainer" parent="OptionsPanel"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -240.0
+offset_top = -160.0
+offset_right = 240.0
+offset_bottom = 160.0
+theme_override_constants/separation = 20
+
+[node name="Title" type="Label" parent="OptionsPanel/Container"]
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 38
+text = "OPCIONES"
+
+[node name="SensRow" type="HBoxContainer" parent="OptionsPanel/Container"]
+
+[node name="SensLabel" type="Label" parent="OptionsPanel/Container/SensRow"]
+custom_minimum_size = Vector2(180, 0)
+text = "Sensibilidad"
+theme_override_font_sizes/font_size = 18
+
+[node name="SensSlider" type="HSlider" parent="OptionsPanel/Container/SensRow"]
+custom_minimum_size = Vector2(260, 0)
+min_value = 0.0005
+max_value = 0.012
+step = 0.0001
+value = 0.003
+
+[node name="VolRow" type="HBoxContainer" parent="OptionsPanel/Container"]
+
+[node name="VolLabel" type="Label" parent="OptionsPanel/Container/VolRow"]
+custom_minimum_size = Vector2(180, 0)
+text = "Volumen master"
+theme_override_font_sizes/font_size = 18
+
+[node name="VolSlider" type="HSlider" parent="OptionsPanel/Container/VolRow"]
+custom_minimum_size = Vector2(260, 0)
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.8
+
+[node name="Spacer" type="Control" parent="OptionsPanel/Container"]
+custom_minimum_size = Vector2(0, 12)
+
+[node name="BackButton" type="Button" parent="OptionsPanel/Container"]
+custom_minimum_size = Vector2(0, 44)
+text = "← Volver"
+theme_override_font_sizes/font_size = 20

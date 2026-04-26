@@ -1,14 +1,18 @@
-# worldFarm — Shooter en Godot 4.6
+# worldFarm — Capybara Combat Training (Shooter en Godot 4.6)
 
 Proyecto de un juego **shooter** desarrollado en **Godot 4.6** (3D, Jolt Physics, Forward+).
-Comienza como **single-player** y está pensado para escalar a **multiplayer** (autoritativo de servidor) sin reescribir la base.
+Single-player con sistema de oleadas; arquitectura preparada para escalar a **multiplayer autoritativo de servidor** sin reescribir la base.
 
-> Este README es la guía maestra del proyecto: arquitectura, sistemas, convenciones y workflow. Lectura recomendada en orden.
+**Personaje principal**: capibara antropomórfico armado con rifle de asalto 🦫🔫.
+**Estilo visual**: stylized / cel-shaded (toon shading + colores saturados, look tipo Fortnite).
+
+> Este README es a la vez **guía de arquitectura** y **estado del proyecto**. Si estás retomando el desarrollo, empieza por la sección 0 ("Estado actual") y vuelve a la 11 ("Roadmap") para ver qué sigue.
 
 ---
 
 ## Tabla de contenidos
 
+0. [**Estado actual y cómo retomar**](#0-estado-actual-y-cómo-retomar) ⬅ empieza aquí si vuelves
 1. [Filosofía del proyecto](#1-filosofía-del-proyecto)
 2. [Stack técnico](#2-stack-técnico)
 3. [Arquitectura general](#3-arquitectura-general)
@@ -21,6 +25,80 @@ Comienza como **single-player** y está pensado para escalar a **multiplayer** (
 10. [Plan de migración a multiplayer](#10-plan-de-migración-a-multiplayer)
 11. [Roadmap por fases](#11-roadmap-por-fases)
 12. [Glosario](#12-glosario)
+
+---
+
+## 0. Estado actual y cómo retomar
+
+### TL;DR del juego (lo que tienes hoy)
+
+Abre el proyecto en Godot 4.6 → `F5` → arrancas en el **menú principal**. Pulsa **JUGAR** y entras al `TrainingMap`:
+
+- **4 oleadas** con dificultad escalada (3 grunts → 4 grunts + 1 heavy → 2 snipers + 2 grunts → 5 grunts + 2 heavies + 2 snipers).
+- **3 tipos de enemigo**: Grunt (60 HP, score 100), Heavy (180 HP lento, score 300), Sniper (35 HP largo alcance, score 200). Spawnean ya en modo CHASE, persiguen via NavigationAgent3D.
+- **AI con strafe**: en estado ATTACK los enemigos dan pasos laterales aleatorios cada 1.5-3s.
+- **Pickups**: HealthPickup (+30 HP) y AmmoPickup (+30 munición) que dropean enemigos al morir según `drop_chance`.
+- **Kill streak**: cadenas de kills <3s entre sí dan multiplicador (x1.5, x2.0, ... tope x4.0). Recibir daño rompe la streak.
+- **HUD completo**: vida, ammo, nombre del arma, score, streak, oleada, contador de enemigos, crosshair con hit-marker, vignette de daño, números flotantes de daño.
+- **Pause menu** (Esc) con sliders de sensibilidad y volumen, persistidos en `user://settings.cfg`.
+- **Game over / Victoria**: overlay con animación de muerte (capibara cae hacia atrás), R para retry o M para menú.
+
+### Controles
+
+| Input | Acción |
+|-------|--------|
+| `WASD` | Mover |
+| `Mouse` | Mirar (TPS over-the-shoulder) |
+| `Click izq.` | Disparar |
+| `Click der.` | Toggle ADS (zoom 35° FOV) |
+| `Rueda mouse` | Zoom continuo (clamp 20°-80°) |
+| `X` | Reset de zoom |
+| `Shift` | Sprint |
+| `Ctrl` | Agacharse (la cápsula encoge — pasas por el túnel sur) |
+| `Space` | Saltar |
+| `R` | Recargar |
+| `1` / `2` | Cambiar entre rifle / pistola (mantienen ammo state) |
+| `Q` | Toggle rápido al arma anterior |
+| `Esc` | Pausar |
+| `R` (en game over/victoria) | Reintentar |
+| `M` (en game over/victoria) | Volver al menú |
+
+### Cómo retomar el desarrollo
+
+1. Abre Godot 4.6 → "Import Project" → carpeta del repo.
+2. Espera a que importe los assets (~5s, especialmente la primera vez con los `.png` y `.jpg` de `assets/`).
+3. **Si las texturas no se ven al `F5`**: cierra y reabre Godot, o en `FileSystem` panel click derecho → "Reload Saved Scene" en `TrainingMap.tscn`.
+4. **Antes de tocar código**: lee §3 (Arquitectura general) y §11 (Roadmap actualizado) — sabrás qué está hecho y qué sigue.
+5. **Convención**: cuando añadas un nuevo sistema, va en `scripts/systems/<nombre>/`, expone API por signals + métodos públicos, NO importa otros sistemas (usa `EventBus` para eventos cross-cutting).
+
+### Visual style — Fortnite-like
+
+El look es **cel-shaded / toon**:
+- Materiales con `diffuse_mode = 3` (DIFFUSE_TOON) y `specular_mode = 1` (SPECULAR_TOON) — luz en pasos discretos en vez de gradiente suave.
+- Colores `albedo_color` saturados, sin texturas diffuse en el mapa (solo flat colors por superficie).
+- Player capibara mantiene textura `leather_white` tinteada de marrón como sustituto de pelaje.
+- Rifle mantiene textura sutil para diferenciarlo del entorno plano.
+- Para más detalle ver [`docs/ASSET_SOURCES.md`](docs/ASSET_SOURCES.md) → sección "🎮 Estilo Fortnite / Stylized".
+
+### Assets
+
+- `assets/textures/proto/` — Kenney prototype (CC0)
+- `assets/textures/pbr/` — Poly Haven PBR realistas (CC0) — usadas en Player/Rifle, NO en mapa actual
+- `assets/audio/sfx/` — Kenney sci-fi sounds (CC0): shoot, impact, footstep, reload
+- Créditos completos: [`assets/CREDITS.md`](assets/CREDITS.md)
+- Fuentes recomendadas para añadir más: [`docs/ASSET_SOURCES.md`](docs/ASSET_SOURCES.md)
+
+### Quick troubleshooting
+
+| Síntoma | Causa probable | Fix |
+|---------|----------------|-----|
+| Texturas no se ven (todo gris/flat) | `.tscn` cacheado en Godot abierto | Cerrar y reabrir Godot |
+| Enemigos no se mueven | Spawn fuera de detection_range | Confirma que `EnemyAI._ready` setea `state = CHASE` si hay `local_player` |
+| Errores `class_name not found` | Reorden circular de ext_resources | Forzar reimport: borra `.godot/`, reabre proyecto |
+| Sin sonido | `Settings.master_volume = 0` persistido | Pause menu → subir slider, o borrar `user://settings.cfg` |
+| Capibara muere y no pasa nada | OK — la animación de caída tarda 1.1s antes del overlay | Espera; o revisa `Player._on_died` |
+
+---
 
 ---
 
@@ -205,24 +283,27 @@ Cada sistema se construye **en aislamiento** primero (con una escena de test pro
 
 ### 6.1. Sistemas core (MVP — fase 1)
 
-| Sistema | Carpeta | Responsabilidad | Componentes que expone |
-|---------|---------|-----------------|------------------------|
-| **Input** | `systems/input/` | Lectura de teclado/ratón/gamepad, rebinding, dead zones. | `InputBuffer` (para combos), action map. |
-| **Movement** | `components/MovementComponent.gd` | Walk, run, jump, crouch, sliding. Físico con `CharacterBody3D` + Jolt. | Signals: `jumped`, `landed`, `started_running`. |
-| **Camera** | `systems/camera/` | 1ª persona / 3ª persona, head bob, FOV dinámico al correr, recoil-camera-kick. | `CameraRig.tscn`. |
-| **Combat / Shooting** | `systems/combat/` | Hitscan y projectile, spread, recoil, daño, headshots. | `WeaponComponent`, `HitboxComponent`, `DamageInfo`. |
-| **Health & Damage** | `components/HealthComponent.gd` | HP, armor, daño, curación, muerte, invulnerabilidad temporal. | Signals: `damaged`, `healed`, `died`. |
-| **Inventory** | `systems/inventory/` | Slots, stacks, hotbar, equipar, drop. | `InventoryComponent`, `ItemData` resource. |
-| **Weapon** | `systems/combat/weapon/` | Equipar, recargar, ammo en mag/reserva, switch entre armas. | `WeaponComponent`, `WeaponData` resource. |
-| **Pickup / Loot** | `systems/spawning/` | Items en el mundo, drop al morir enemigos, magnet pickup. | `Pickup.tscn`, `LootTable` resource. |
-| **AI / Enemy** | `systems/ai/` | State Machine (Idle → Patrol → Chase → Attack → Dead), percepción (vista, audio). | `AIController`, `PerceptionComponent`. |
-| **Spawning** | `systems/spawning/` | Spawn de enemigos por oleadas / triggers / timers. | `Spawner.tscn`, `WaveData` resource. |
-| **UI / HUD** | `systems/ui/` | Vida, ammo, hotbar, crosshair, daño direccional, menús. | `HUD.tscn`, `Menu.tscn`. |
-| **Audio** | `systems/audio/` | Pool de `AudioStreamPlayer3D`, music bus, sfx con pitch/volume aleatorio. | `AudioManager` autoload. |
-| **VFX** | `systems/vfx/` | Muzzle flash, decals de impacto, sangre, explosiones. Pool de partículas. | `VFXManager`. |
-| **Save / Load** | `systems/save/` | Serialización de estado relevante (progresión, settings, no posiciones). | `SaveSystem` autoload. |
-| **GameState / Round** | `autoload/GameState.gd` | Score, ronda, modo, victoria/derrota, pausa. | Signals: `round_started`, `round_ended`. |
-| **Settings** | `autoload/Settings.gd` | Volumen, sensibilidad, gamma, keybindings. | Persiste en `user://settings.cfg`. |
+Estado: ✅ implementado · 🟡 implementado parcialmente · ⏳ pendiente
+
+| Sistema | Estado | Ubicación real | Notas de implementación |
+|---------|--------|----------------|-------------------------|
+| **Input** | ✅ | `autoload/InputSetup.gd` | Acciones registradas en runtime (move_forward/back/left/right, jump, sprint, crouch, fire, aim, reload, zoom_reset) usando `physical_keycode`. No hay rebinding UI todavía. |
+| **Movement** | ✅ | `components/MovementComponent.gd` | WASD, sprint, crouch (encoge cápsula colisión con lerp), jump. Footsteps signal. AI/NPC usan `read_input = false` + `external_wish_dir`. |
+| **Camera** | ✅ | en `Player.tscn` | TPS over-the-shoulder. Pitch + body yaw. SpringArm3D. Recoil pivot separado del pitch (decay). Shake al daño. Zoom (rueda mouse / right-click ADS toggle). FOV lerp. |
+| **Combat / Shooting** | ✅ | `components/WeaponComponent.gd` + `components/WeaponVFX.gd` | Hitscan con spread aleatorio. Cooldown por RPM. Modos SEMI/AUTO/BURST. Tracer + decals + sparks + muzzle flash. |
+| **Health & Damage** | ✅ | `components/HealthComponent.gd` | take_damage / heal / died signals. |
+| **Inventory** | 🟡 | en `Player.gd` directamente | Player tiene `Array[WeaponData]` + ammo state preservado al swap. Falta inventario general (consumibles, key items). |
+| **Weapon** | ✅ | `components/WeaponComponent.gd` + `resources/weapons/*.tres` | rifle_basic, rifle_enemy, rifle_sniper, pistol_basic. Player swap con 1/2/Q. |
+| **Pickup / Loot** | ✅ | `entities/Pickup.gd` + `HealthPickup` + `AmmoPickup` | Area3D con hover/spin. Enemy droppea según `EnemyData.drop_chance`. EventBus.pickup_collected → HUD feedback. |
+| **AI / Enemy** | ✅ | `components/EnemyAI.gd` | State machine IDLE→CHASE→ATTACK→DEAD. NavigationAgent3D para pathfinding. LOS check via raycast. Strafe en ATTACK. Empieza CHASE si hay player. |
+| **Spawning / Waves** | ✅ | `systems/spawning/WaveSystem.gd` + `WaveData` | 4 oleadas con tipos mezclados (Array[EnemyData] paralelo a counts). Timer entre oleadas. Pausa con `GameState.mode != PLAYING`. |
+| **UI / HUD** | ✅ | `ui/HUD.gd` + `MainMenu.gd` | Crosshair + hit marker + health + ammo + reload + score + streak + wave + damage vignette + end overlay + pause menu + main menu con sliders. |
+| **Audio** | ✅ | `autoload/AudioManager.gd` | `STREAM_VARIATIONS` dict con randomización. Suscripto a EventBus.weapon_fired/impact. AudioStreamPlayer3D con atenuación. Footsteps via `MovementComponent.step` signal. |
+| **VFX** | ✅ | `components/WeaponVFX.gd` + `systems/vfx/DamageNumbers.gd` | Muzzle flash, tracer, bullet hole decal (QuadMesh con tween), sparks (CPUParticles3D), camera shake, weapon kick visual. Damage numbers flotantes (Label3D billboard). |
+| **Score / Streak** | ✅ | `autoload/GameState.gd` | Score con setter + signal. Kill streak (3s ventana, x1.5/2.0/2.5/... tope x4.0). Reset al recibir daño. |
+| **GameState / Round** | ✅ | `autoload/GameState.gd` | Mode enum (MENU/PLAYING/PAUSED/GAME_OVER/VICTORY) con signal. Local_player ref. |
+| **Settings** | ✅ | `autoload/Settings.gd` | Persiste mouse_sensitivity, master_volume, sfx_volume en `user://settings.cfg`. Aplica a AudioServer y a Player (via signal). |
+| **Save / Load** | 🟡 | solo Settings | Settings persistidas. Falta savegame de progreso/score/unlocks. |
 
 ### 6.2. Sistemas a añadir (fase 2+)
 
@@ -434,23 +515,24 @@ Cuando llegue la fase 2, el plan es:
 
 ## 11. Roadmap por fases
 
-**Fase 0 — Setup (este README + scaffolding).** ✅
-Estructura de carpetas, autoloads vacíos, convenciones acordadas.
+**Fase 0 — Setup.** ✅ COMPLETADA
+Estructura de carpetas, autoloads, convenciones, README.
 
-**Fase 1 — MVP single-player jugable.**
-Player con movimiento + 1 arma + 1 enemigo dummy + HUD básico + 1 mapa de prueba. Sistemas: Input, Movement, Camera, Combat, Health, Weapon, HUD, Audio mínimo.
+**Fase 1 — MVP single-player jugable.** ✅ COMPLETADA
+Player capibara con movimiento procedural + rifle + 3 enemigos con AI + HUD completo + mapa de entrenamiento + audio + VFX.
 
-**Fase 2 — Loop de juego.**
-Inventory, Pickup, Spawning por oleadas, AI con state machine, varias armas, Save de progreso, menús (main menu, pausa, opciones).
+**Fase 2 — Loop de juego.** ✅ COMPLETADA
+Sistema de oleadas (4 waves con tipos mezclados), pickups (health/ammo) que dropean enemigos, weapon swap (rifle/pistola), main menu, pause menu con opciones, settings persistidas, game over + retry, kill streak con multiplicador.
 
-**Fase 3 — Contenido y pulido.**
-Más enemigos, más armas, VFX, audio completo, balanceo, accesibilidad básica.
+**Fase 3 — Contenido y pulido.** 🟡 EN PROGRESO
+Hecho: 3 tipos de enemigo (Grunt/Heavy/Sniper), assets PBR + stylized, toon shading look Fortnite, decals + sparks + damage numbers, animación de muerte del player.
+Pendiente: música, modo endless, achievements, boss enemy, más armas (escopeta, granada), accesibilidad (subtítulos, daltonismo, escalado UI), localización (`tr()` wrapping), tests gdUnit4, build presets.
 
-**Fase 4 — Multiplayer.**
-NetworkManager, sync, lobby, prediction, lag compensation. 2-4 jugadores cooperativo primero, PvP después.
+**Fase 4 — Multiplayer.** ⏳ PENDIENTE
+NetworkManager autoload, MultiplayerSynchronizer en Player, RPC para take_damage/equip_weapon, lobby ENet, client-side prediction, lag compensation. Empezar con 2-4 jugadores cooperativo.
 
-**Fase 5 — Live.**
-Telemetría, analytics, posibles updates, modding.
+**Fase 5 — Live.** ⏳ PENDIENTE
+Telemetría, analytics, updates, modding API.
 
 ---
 
@@ -468,12 +550,77 @@ Telemetría, analytics, posibles updates, modding.
 
 ---
 
-## Próximos pasos en este repo
+## Próximos pasos sugeridos (backlog priorizado)
 
-1. Crear los autoloads vacíos (`EventBus`, `GameState`, `RNG`, `Settings`) y registrarlos en `Project Settings > Autoload`.
-2. Implementar `HealthComponent` + un test de daño en `tests/integration/`.
-3. Implementar `MovementComponent` + Player mínimo en una escena sandbox.
-4. Implementar `WeaponComponent` con un `WeaponData` de pistola hitscan.
-5. Conectar todo con el EventBus y validar el flujo del §9.
+Cuando retomes el desarrollo, este es el orden recomendado. Cada bullet
+es ~1 iteración independiente — puedes saltar de uno a otro sin orden
+estricto, pero estos están priorizados por **impacto / esfuerzo**.
 
-> Cuando un sistema esté listo, añadir aquí una nota corta y un link a su README específico en `docs/`.
+### 🥇 Alta prioridad (lo que más mueve la aguja)
+
+1. **Modo endless** — después de Wave 4, generar oleadas procedurales con dificultad escalada (cada N waves +20% HP, +10% velocidad). Nuevo botón "ENDLESS" en MainMenu. Tracking de "best wave reached" en Settings.
+2. **Boss enemy en Wave 4** — entity especial con 600 HP, ataques especiales (charge attack, área de explosión). Reusa Enemy.gd con override de comportamiento o crea `BossAI.gd`.
+3. **Más armas**: escopeta (multi-pellet hitscan, 8 pellets con spread alto, 6 mag), granada (proyectil con timer + radio de daño), launcher. Slot 3 keybind.
+4. **Música + ambient** — bajar de Pixabay Music o Sonniss un track de combate loopeable. Crear `MusicManager` autoload con crossfade entre menú/combate/victoria.
+5. **Achievements / medallas** — primer kill, kill streak x4, headshot, sobrevivir oleada sin daño. Toast notification en HUD esquina.
+
+### 🥈 Polish y UX
+
+6. **Rebinding de keys** en options menu. Iterar sobre `InputMap.get_actions()` y mostrar listener para cada acción.
+7. **Tutorial / onboarding** — primera vez en TrainingMap, mostrar overlay con pista de controles. `Settings.first_run = false` después.
+8. **Accesibilidad**: subtítulos para disparos enemigos cerca, modo daltonismo (paleta alternativa), escalado de UI (slider en options).
+9. **Death animation del Enemy mejorada** — actualmente solo cae hacia adelante. Variar: caer hacia atrás, de lado, según dirección del último impacto.
+10. **AI peek-and-shoot desde cobertura** — detectar StaticBody3D cercanos como cover, asomar/esconder en ATTACK state. Más complejo que strafe.
+
+### 🥉 Calidad técnica
+
+11. **Tests gdUnit4** — smoke tests para `HealthComponent.take_damage`, `WaveSystem._spawn_one`, `WeaponComponent.try_fire`. Carpeta `tests/unit/`.
+12. **Localización** — wrap todos los strings en `tr()`, exportar a `.po`. Actualmente todo en español hardcoded.
+13. **Pool de decals/audio** — máximo N decals/audio simultáneos. FIFO queue en `WeaponVFX` y `AudioManager`. Evita pile-up en full-auto largo.
+14. **Build presets** — `Project > Export > Add Preset` para Windows/Linux/Web. Verifica que los assets se incluyen y no hay paths hardcoded.
+15. **Telemetría** — eventos a un endpoint (kills, deaths, waves reached) para balance. `TelemetryManager` autoload con buffer + flush periódico.
+
+### 🌐 Fase 4 — Multiplayer (cuando el SP esté sólido)
+
+16. **NetworkManager** autoload con host/join/disconnect.
+17. **MultiplayerSynchronizer** en Player para position/rotation/health.
+18. Convertir `take_damage`, `equip_weapon`, `pick_up_item` a `@rpc`.
+19. Client-side prediction para movimiento.
+20. Lag compensation para hit detection (rewind del servidor).
+21. Lobby con `ENetMultiplayerPeer`.
+
+### Convenciones para continuar
+
+- **Cada feature nueva**: crea task en TaskCreate (si usas el agente), implementa, marca completed.
+- **Cada sistema nuevo** va en `scripts/systems/<nombre>/`. NO importa otros sistemas — usa `EventBus`.
+- **Cada Resource nuevo** (datos): `class_name FooData extends Resource`, archivo en `resources/<categoría>/foo.tres`.
+- **Cada signal nuevo de eventos cross-cutting**: añadirlo en `EventBus.gd`, no como signal local.
+- **Cada asset bajado**: actualizar `assets/CREDITS.md` con licencia + autor + URL. Para fuentes nuevas, ver `docs/ASSET_SOURCES.md`.
+
+### Qué NO toques sin pensar
+
+- `class_name Player` y `class_name Enemy` — todo lo demás depende de estos.
+- El orden de autoloads en `project.godot` — `EventBus` primero, `Settings` antes de cualquiera que escuche su signal.
+- `MovementComponent.read_input` — el flag que diferencia Player (input humano) de Enemy (AI). Si lo cambias, ambos se rompen.
+- La estructura de `Visuals/Head + ArmL + ArmR + LegL + LegR` en Player.tscn — `HumanoidAnimator` la usa por NodePath. Si renombras, anima nada.
+
+---
+
+## Documentos relacionados
+
+- [`assets/CREDITS.md`](assets/CREDITS.md) — créditos de todos los assets de terceros (CC0 actualmente).
+- [`docs/ASSET_SOURCES.md`](docs/ASSET_SOURCES.md) — guía curada de sitios para bajar más assets gratis (Poly Haven, Kenney, Quaternius, Mixamo, etc.) + sección dedicada a "look Fortnite".
+
+---
+
+## Changelog resumido
+
+- **v0.1** — Scaffolding, arquitectura, autoloads vacíos.
+- **v0.2** — Player humanoid + WASD + rifle hitscan + 1 enemigo dummy + HUD básico.
+- **v0.3** — Animación procedural humanoid (caminar, brazos sostienen rifle), zoom, recoil, shake.
+- **v0.4** — Bot enemigo con AI state machine + LOS, training map completo (galería + cobertura + parkour + maze + túnel).
+- **v0.5** — VFX (decals + sparks + damage numbers + tracer + muzzle), audio (procedural → real OGG), HUD completo.
+- **v0.6** — Sistema de oleadas, pickups, kill streak, weapon swap, pause menu, settings persistidas.
+- **v0.7** — 3 tipos de enemigo, animación de muerte, hit marker, AI strafe, NavigationAgent3D pathfinding.
+- **v0.8** — Player → capibara, assets PBR Poly Haven, toon shading + colores saturados (look stylized).
+- **v0.9** — Main menu, mapa con flat colors saturados (look Fortnite genuino), README actualizado para retomar.

@@ -15,6 +15,7 @@ extends CharacterBody3D
 @onready var movement: MovementComponent = $MovementComponent
 @onready var weapon: WeaponComponent = $WeaponComponent
 @onready var animator: HumanoidAnimator = $HumanoidAnimator
+@onready var visuals: Node3D = $Visuals
 
 var _mouse_sensitivity: float = 0.003
 const PITCH_LIMIT: float = deg_to_rad(70.0)
@@ -219,15 +220,33 @@ func _on_player_damaged(amount: float, _source: Node) -> void:
 		animator.flash_hit(0.12)
 	_shake_intensity = clampf(_shake_intensity + amount * 0.04, 0.0, shake_max)
 	EventBus.entity_damaged.emit(self, amount)
+	GameState.notify_player_damaged()
 
 
 func _on_died() -> void:
 	EventBus.player_died.emit(self)
-	GameState.mode = GameState.Mode.GAME_OVER
-	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	# Bloquear input pero NO setear GAME_OVER inmediatamente — esperamos que
+	# termine la animación de caída para que el HUD muestre el overlay tras
+	# el efecto dramático.
 	set_physics_process(false)
 	set_process_input(false)
-	print("[Player] muerto — game over")
+	movement.external_wish_dir = Vector3.ZERO
+
+	# Animación: el capibara cae hacia atrás + cámara al suelo
+	var tween := create_tween().set_parallel(true)
+	if visuals:
+		tween.tween_property(visuals, "rotation:x", deg_to_rad(75), 0.7) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	if camera_pitch:
+		tween.tween_property(camera_pitch, "rotation:x", deg_to_rad(-50), 0.8) \
+			.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# Tras la caída, dar el control al GameState (HUD muestra overlay).
+	tween.chain().tween_interval(0.4)
+	tween.chain().tween_callback(func():
+		GameState.mode = GameState.Mode.GAME_OVER
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	)
 
 
 func _on_setting_changed(key: StringName, value: Variant) -> void:
