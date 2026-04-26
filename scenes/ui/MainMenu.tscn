@@ -1,7 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/MainMenu.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/levels/TrainingMap.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/characters/player/Player.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/ui/PlayerRotator.gd" id="4"]
 
 [sub_resource type="ProceduralSkyMaterial" id="MenuSky"]
 sky_top_color = Color(0.18, 0.32, 0.55, 1)
@@ -10,90 +12,156 @@ ground_bottom_color = Color(0.08, 0.10, 0.15, 1)
 ground_horizon_color = Color(0.55, 0.45, 0.40, 1)
 sun_angle_max = 30.0
 
+[sub_resource type="Sky" id="Sky_men"]
+sky_material = SubResource("MenuSky")
+
+[sub_resource type="Environment" id="Environment_light"]
+background_mode = 2
+sky = SubResource("Sky_men")
+ambient_light_source = 2
+ambient_light_color = Color(0.3, 0.3, 0.35, 1)
+tonemap_mode = 2
+glow_enabled = true
+
 [node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 script = ExtResource("1")
 play_scene = ExtResource("2")
-anchor_right = 1.0
-anchor_bottom = 1.0
 
-[node name="BG" type="ColorRect" parent="."]
+[node name="SubViewportContainer" type="SubViewportContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-color = Color(0.10, 0.13, 0.20, 1)
-mouse_filter = 2
+grow_horizontal = 2
+grow_vertical = 2
+stretch = true
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
+handle_input_locally = false
+msaa_3d = 2
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewportContainer/SubViewport"]
+environment = SubResource("Environment_light")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport"]
+transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 5, 0)
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="SubViewportContainer/SubViewport"]
+transform = Transform3D(0.965926, 0.0669873, -0.25, 0, 0.965926, 0.258819, 0.258819, -0.25, 0.933013, 2.5, 1.2, 5)
+current = true
+
+[node name="PlayerRotator" type="Node3D" parent="SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 1)
+script = ExtResource("4")
+
+[node name="Player" parent="SubViewportContainer/SubViewport/PlayerRotator" instance=ExtResource("3")]
+
+[node name="LeftPanel" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 420.0
+grow_vertical = 2
+color = Color(0.08, 0.1, 0.14, 0.9)
 
 [node name="Container" type="VBoxContainer" parent="."]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -260.0
-offset_top = -220.0
-offset_right = 260.0
-offset_bottom = 220.0
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_left = 60.0
+offset_right = 360.0
+grow_vertical = 2
 alignment = 1
 theme_override_constants/separation = 30
 
 [node name="Title" type="Label" parent="Container"]
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 72
+layout_mode = 2
+theme_override_font_sizes/font_size = 48
 modulate = Color(1, 0.85, 0.50, 1)
-text = "🦫  WORLD FARM"
+text = "WORLD 
+FARM"
 
 [node name="Subtitle" type="Label" parent="Container"]
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 22
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
 modulate = Color(0.85, 0.85, 0.95, 0.85)
-text = "Capybara Combat Training"
+text = "Capybara Combat"
 
 [node name="Spacer" type="Control" parent="Container"]
-custom_minimum_size = Vector2(0, 24)
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
 
 [node name="Buttons" type="VBoxContainer" parent="Container"]
+layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 14
+theme_override_constants/separation = 16
 
 [node name="PlayButton" type="Button" parent="Container/Buttons"]
-custom_minimum_size = Vector2(280, 54)
+custom_minimum_size = Vector2(0, 54)
+layout_mode = 2
 text = "▶  JUGAR"
 theme_override_font_sizes/font_size = 24
+alignment = 0
 
 [node name="OptionsButton" type="Button" parent="Container/Buttons"]
-custom_minimum_size = Vector2(280, 44)
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
 text = "⚙   OPCIONES"
 theme_override_font_sizes/font_size = 20
+alignment = 0
 
 [node name="QuitButton" type="Button" parent="Container/Buttons"]
-custom_minimum_size = Vector2(280, 44)
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
 text = "✕  SALIR"
 theme_override_font_sizes/font_size = 20
+alignment = 0
 
 [node name="Hint" type="Label" parent="."]
-anchor_left = 0.5
+layout_mode = 1
+anchors_preset = 2
 anchor_top = 1.0
-anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -300.0
+offset_left = 20.0
 offset_top = -40.0
-offset_right = 300.0
+offset_right = 600.0
 offset_bottom = -10.0
-horizontal_alignment = 1
-theme_override_font_sizes/font_size = 14
-modulate = Color(0.75, 0.75, 0.85, 0.7)
-text = "WASD mover · Mouse mirar · Click disparar · R recargar · 1/2 cambiar arma · Ctrl agachar · Shift correr · Rueda zoom · Esc pausa"
+grow_vertical = 0
+theme_override_font_sizes/font_size = 12
+modulate = Color(0.75, 0.75, 0.85, 0.5)
+text = "WASD mover · Mouse mirar · Click disparar · Esc pausa"
 mouse_filter = 2
 
 [node name="OptionsPanel" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-visible = false
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="BG2" type="ColorRect" parent="OptionsPanel"]
+layout_mode = 1
+anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(0.05, 0.07, 0.12, 0.92)
 
 [node name="Container" type="VBoxContainer" parent="OptionsPanel"]
+layout_mode = 1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -102,45 +170,57 @@ offset_left = -240.0
 offset_top = -160.0
 offset_right = 240.0
 offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/separation = 20
 
 [node name="Title" type="Label" parent="OptionsPanel/Container"]
-horizontal_alignment = 1
+layout_mode = 2
 theme_override_font_sizes/font_size = 38
 text = "OPCIONES"
+horizontal_alignment = 1
 
 [node name="SensRow" type="HBoxContainer" parent="OptionsPanel/Container"]
+layout_mode = 2
 
 [node name="SensLabel" type="Label" parent="OptionsPanel/Container/SensRow"]
 custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
 text = "Sensibilidad"
 theme_override_font_sizes/font_size = 18
 
 [node name="SensSlider" type="HSlider" parent="OptionsPanel/Container/SensRow"]
 custom_minimum_size = Vector2(260, 0)
+layout_mode = 2
+size_flags_vertical = 4
 min_value = 0.0005
 max_value = 0.012
 step = 0.0001
 value = 0.003
 
 [node name="VolRow" type="HBoxContainer" parent="OptionsPanel/Container"]
+layout_mode = 2
 
 [node name="VolLabel" type="Label" parent="OptionsPanel/Container/VolRow"]
 custom_minimum_size = Vector2(180, 0)
+layout_mode = 2
 text = "Volumen master"
 theme_override_font_sizes/font_size = 18
 
 [node name="VolSlider" type="HSlider" parent="OptionsPanel/Container/VolRow"]
 custom_minimum_size = Vector2(260, 0)
-min_value = 0.0
+layout_mode = 2
+size_flags_vertical = 4
 max_value = 1.0
 step = 0.01
 value = 0.8
 
 [node name="Spacer" type="Control" parent="OptionsPanel/Container"]
 custom_minimum_size = Vector2(0, 12)
+layout_mode = 2
 
 [node name="BackButton" type="Button" parent="OptionsPanel/Container"]
 custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
 text = "← Volver"
 theme_override_font_sizes/font_size = 20

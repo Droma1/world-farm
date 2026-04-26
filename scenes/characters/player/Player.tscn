@@ -1,4 +1,4 @@
-[gd_scene load_steps=24 format=3]
+[gd_scene load_steps=23 format=3]
 
 [ext_resource type="Script" path="res://scripts/entities/Player.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/components/HealthComponent.gd" id="2"]
@@ -8,186 +8,214 @@
 [ext_resource type="Script" path="res://scripts/components/WeaponVFX.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/components/HumanoidAnimator.gd" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/Rifle.tscn" id="8"]
-[ext_resource type="Texture2D" path="res://assets/textures/pbr/fur_diff.jpg" id="FurDiff"]
-[ext_resource type="Texture2D" path="res://assets/textures/pbr/fur_nor.jpg" id="FurNor"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
-height = 1.7
-radius = 0.45
+height = 1.85
+radius = 0.42
 
-; --- Materiales del capibara — leather_white tinteado marrón ---
-[sub_resource type="StandardMaterial3D" id="FurBodyMat"]
-diffuse_mode = 3
-specular_mode = 1
-albedo_color = Color(0.85, 0.50, 0.25, 1)
-albedo_texture = ExtResource("FurDiff")
-normal_enabled = true
-normal_texture = ExtResource("FurNor")
-normal_scale = 0.4
-uv1_triplanar = true
-uv1_scale = Vector3(4, 4, 4)
-roughness = 0.95
-specular = 0.1
+[sub_resource type="StandardMaterial3D" id="ArmorMat_1"]
+albedo_color = Color(0.34, 0.36, 0.40, 1)
+metallic = 0.75
+roughness = 0.32
 
-[sub_resource type="StandardMaterial3D" id="FurBellyMat"]
-diffuse_mode = 3
-specular_mode = 1
-albedo_color = Color(1.0, 0.78, 0.55, 1)
-albedo_texture = ExtResource("FurDiff")
-normal_enabled = true
-normal_texture = ExtResource("FurNor")
-normal_scale = 0.3
-uv1_triplanar = true
-uv1_scale = Vector3(4, 4, 4)
-roughness = 0.95
-specular = 0.1
+[sub_resource type="StandardMaterial3D" id="ArmorMat_2"]
+albedo_color = Color(0.18, 0.20, 0.24, 1)
+metallic = 0.9
+roughness = 0.22
 
-[sub_resource type="StandardMaterial3D" id="FurHeadMat"]
-diffuse_mode = 3
-specular_mode = 1
-albedo_color = Color(0.92, 0.60, 0.32, 1)
-albedo_texture = ExtResource("FurDiff")
-normal_enabled = true
-normal_texture = ExtResource("FurNor")
-normal_scale = 0.4
-uv1_triplanar = true
-uv1_scale = Vector3(5, 5, 5)
-roughness = 0.95
-specular = 0.1
+[sub_resource type="StandardMaterial3D" id="ArmorMat_3"]
+albedo_color = Color(0.61, 0.50, 0.34, 1)
+metallic = 0.65
+roughness = 0.38
 
-[sub_resource type="StandardMaterial3D" id="SnoutMat"]
-diffuse_mode = 3
-specular_mode = 1
-albedo_color = Color(0.40, 0.22, 0.14, 1)
-roughness = 0.6
-specular = 0.1
+[sub_resource type="StandardMaterial3D" id="VisorMat_1"]
+albedo_color = Color(0.17, 0.67, 0.90, 1)
+emission_enabled = true
+emission = Color(0.17, 0.67, 0.90, 1)
+emission_energy_multiplier = 1.8
+metallic = 0.15
+roughness = 0.08
 
-[sub_resource type="StandardMaterial3D" id="EyeMat"]
-shading_mode = 0
-albedo_color = Color(0.05, 0.04, 0.04, 1)
+[sub_resource type="BoxMesh" id="ChestMesh_1"]
+size = Vector3(0.72, 0.58, 0.42)
 
-; --- Meshes — proporciones gordito ---
-[sub_resource type="BoxMesh" id="TorsoMesh_1"]
-size = Vector3(0.62, 0.55, 0.45)
+[sub_resource type="BoxMesh" id="CoreMesh_1"]
+size = Vector3(0.54, 0.34, 0.28)
 
-[sub_resource type="SphereMesh" id="BellyMesh_1"]
-radius = 0.30
-height = 0.55
+[sub_resource type="BoxMesh" id="PelvisMesh_1"]
+size = Vector3(0.48, 0.22, 0.30)
 
-[sub_resource type="SphereMesh" id="HeadMesh_1"]
+[sub_resource type="SphereMesh" id="ShoulderMesh_1"]
+radius = 0.12
+height = 0.24
+
+[sub_resource type="BoxMesh" id="NeckMesh_1"]
+size = Vector3(0.14, 0.12, 0.14)
+
+[sub_resource type="SphereMesh" id="HelmetShellMesh_1"]
 radius = 0.24
-height = 0.48
+height = 0.46
 
-[sub_resource type="BoxMesh" id="SnoutMesh_1"]
-size = Vector3(0.26, 0.18, 0.22)
+[sub_resource type="BoxMesh" id="HelmetSnoutMesh_1"]
+size = Vector3(0.24, 0.14, 0.18)
 
-[sub_resource type="SphereMesh" id="EarMesh_1"]
-radius = 0.06
-height = 0.12
+[sub_resource type="BoxMesh" id="HelmetEarMesh_1"]
+size = Vector3(0.08, 0.10, 0.06)
 
-[sub_resource type="SphereMesh" id="EyeMesh_1"]
-radius = 0.022
-height = 0.044
+[sub_resource type="BoxMesh" id="VisorMesh_1"]
+size = Vector3(0.28, 0.08, 0.04)
 
 [sub_resource type="CapsuleMesh" id="ArmMesh_1"]
-height = 0.50
-radius = 0.10
+height = 0.64
+radius = 0.09
+
+[sub_resource type="BoxMesh" id="ForearmMesh_1"]
+size = Vector3(0.18, 0.26, 0.18)
 
 [sub_resource type="CapsuleMesh" id="LegMesh_1"]
-height = 0.55
-radius = 0.14
+height = 0.76
+radius = 0.12
+
+[sub_resource type="BoxMesh" id="ShinMesh_1"]
+size = Vector3(0.20, 0.32, 0.22)
+
+[sub_resource type="BoxMesh" id="FootMesh_1"]
+size = Vector3(0.20, 0.10, 0.30)
 
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1")
 data = ExtResource("5")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.925, 0)
 shape = SubResource("CapsuleShape3D_1")
 
 [node name="Visuals" type="Node3D" parent="."]
 
-; --- Torso + barriga sobresale al frente ---
-[node name="Torso" type="MeshInstance3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.92, 0)
-mesh = SubResource("TorsoMesh_1")
-material_override = SubResource("FurBodyMat")
+[node name="TorsoRig" type="Node3D" parent="Visuals"]
 
-[node name="Belly" type="MeshInstance3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 0.85, 0, 0, 0, 1, 0, 0.78, -0.12)
-mesh = SubResource("BellyMesh_1")
-material_override = SubResource("FurBellyMat")
+[node name="Torso" type="MeshInstance3D" parent="Visuals/TorsoRig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.10, 0)
+mesh = SubResource("ChestMesh_1")
+material_override = SubResource("ArmorMat_1")
 
-; --- Cabeza compuesta — capibara ---
-[node name="Head" type="Node3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.36, 0)
+[node name="Core" type="MeshInstance3D" parent="Visuals/TorsoRig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.78, -0.01)
+mesh = SubResource("CoreMesh_1")
+material_override = SubResource("ArmorMat_2")
 
-[node name="Skull" type="MeshInstance3D" parent="Visuals/Head"]
-mesh = SubResource("HeadMesh_1")
-material_override = SubResource("FurHeadMat")
+[node name="Pelvis" type="MeshInstance3D" parent="Visuals/TorsoRig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.53, 0.03)
+mesh = SubResource("PelvisMesh_1")
+material_override = SubResource("ArmorMat_3")
 
-[node name="Snout" type="MeshInstance3D" parent="Visuals/Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.06, -0.22)
-mesh = SubResource("SnoutMesh_1")
-material_override = SubResource("SnoutMat")
+[node name="ShoulderL" type="MeshInstance3D" parent="Visuals/TorsoRig"]
+transform = Transform3D(0.92, 0, 0, 0, 1.0, 0, 0, 0, 1.08, -0.39, 1.10, -0.01)
+mesh = SubResource("ShoulderMesh_1")
+material_override = SubResource("ArmorMat_3")
 
-[node name="EyeL" type="MeshInstance3D" parent="Visuals/Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.10, 0.05, -0.20)
-mesh = SubResource("EyeMesh_1")
-material_override = SubResource("EyeMat")
+[node name="ShoulderR" type="MeshInstance3D" parent="Visuals/TorsoRig"]
+transform = Transform3D(0.92, 0, 0, 0, 1.0, 0, 0, 0, 1.08, 0.39, 1.10, -0.01)
+mesh = SubResource("ShoulderMesh_1")
+material_override = SubResource("ArmorMat_3")
 
-[node name="EyeR" type="MeshInstance3D" parent="Visuals/Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.10, 0.05, -0.20)
-mesh = SubResource("EyeMesh_1")
-material_override = SubResource("EyeMat")
+[node name="Neck" type="MeshInstance3D" parent="Visuals/TorsoRig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.42, -0.01)
+mesh = SubResource("NeckMesh_1")
+material_override = SubResource("ArmorMat_2")
 
-[node name="EarL" type="MeshInstance3D" parent="Visuals/Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.16, 0.18, 0.04)
-mesh = SubResource("EarMesh_1")
-material_override = SubResource("FurHeadMat")
+[node name="Head" type="Node3D" parent="Visuals/TorsoRig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.57, -0.02)
 
-[node name="EarR" type="MeshInstance3D" parent="Visuals/Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.16, 0.18, 0.04)
-mesh = SubResource("EarMesh_1")
-material_override = SubResource("FurHeadMat")
+[node name="HelmetShell" type="MeshInstance3D" parent="Visuals/TorsoRig/Head"]
+transform = Transform3D(1.05, 0, 0, 0, 0.95, 0, 0, 0, 1.18, 0, 0, 0)
+mesh = SubResource("HelmetShellMesh_1")
+material_override = SubResource("ArmorMat_3")
 
-; --- Brazos cortos y gruesos ---
+[node name="HelmetSnout" type="MeshInstance3D" parent="Visuals/TorsoRig/Head"]
+transform = Transform3D(1, 0, 0, 0, 0.9, 0, 0, 0, 1, 0, -0.02, -0.19)
+mesh = SubResource("HelmetSnoutMesh_1")
+material_override = SubResource("ArmorMat_3")
+
+[node name="Visor" type="MeshInstance3D" parent="Visuals/TorsoRig/Head"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.02, -0.22)
+mesh = SubResource("VisorMesh_1")
+material_override = SubResource("VisorMat_1")
+
+[node name="EarL" type="MeshInstance3D" parent="Visuals/TorsoRig/Head"]
+transform = Transform3D(0.92, -0.22, 0, 0.22, 0.92, 0, 0, 0, 1, -0.16, 0.16, 0.00)
+mesh = SubResource("HelmetEarMesh_1")
+material_override = SubResource("ArmorMat_2")
+
+[node name="EarR" type="MeshInstance3D" parent="Visuals/TorsoRig/Head"]
+transform = Transform3D(0.92, 0.22, 0, -0.22, 0.92, 0, 0, 0, 1, 0.16, 0.16, 0.00)
+mesh = SubResource("HelmetEarMesh_1")
+material_override = SubResource("ArmorMat_2")
+
 [node name="ArmL" type="Node3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.30, 1.10, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.40, 1.28, -0.02)
 
 [node name="Mesh" type="MeshInstance3D" parent="Visuals/ArmL"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.32, 0)
 mesh = SubResource("ArmMesh_1")
-material_override = SubResource("FurBodyMat")
+material_override = SubResource("ArmorMat_1")
+
+[node name="Forearm" type="MeshInstance3D" parent="Visuals/ArmL"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.63, 0.01)
+mesh = SubResource("ForearmMesh_1")
+material_override = SubResource("ArmorMat_2")
 
 [node name="ArmR" type="Node3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.30, 1.10, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.40, 1.28, -0.02)
 
 [node name="Mesh" type="MeshInstance3D" parent="Visuals/ArmR"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.32, 0)
 mesh = SubResource("ArmMesh_1")
-material_override = SubResource("FurBodyMat")
+material_override = SubResource("ArmorMat_1")
 
-; --- Patas cortas y rechonchas ---
+[node name="Forearm" type="MeshInstance3D" parent="Visuals/ArmR"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.63, 0.01)
+mesh = SubResource("ForearmMesh_1")
+material_override = SubResource("ArmorMat_2")
+
 [node name="LegL" type="Node3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.13, 0.55, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.18, 0.72, 0.02)
 
 [node name="Mesh" type="MeshInstance3D" parent="Visuals/LegL"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.275, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.38, 0)
 mesh = SubResource("LegMesh_1")
-material_override = SubResource("FurBodyMat")
+material_override = SubResource("ArmorMat_1")
+
+[node name="Shin" type="MeshInstance3D" parent="Visuals/LegL"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.80, 0.02)
+mesh = SubResource("ShinMesh_1")
+material_override = SubResource("ArmorMat_2")
+
+[node name="Foot" type="MeshInstance3D" parent="Visuals/LegL"]
+transform = Transform3D(1, 0, 0, 0, 0.85, 0, 0, 0, 1, 0, -0.98, -0.08)
+mesh = SubResource("FootMesh_1")
+material_override = SubResource("ArmorMat_3")
 
 [node name="LegR" type="Node3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.13, 0.55, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 0.72, 0.02)
 
 [node name="Mesh" type="MeshInstance3D" parent="Visuals/LegR"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.275, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.38, 0)
 mesh = SubResource("LegMesh_1")
-material_override = SubResource("FurBodyMat")
+material_override = SubResource("ArmorMat_1")
 
-; --- Cámara TPS — bajada para el capibara más bajito ---
+[node name="Shin" type="MeshInstance3D" parent="Visuals/LegR"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.80, 0.02)
+mesh = SubResource("ShinMesh_1")
+material_override = SubResource("ArmorMat_2")
+
+[node name="Foot" type="MeshInstance3D" parent="Visuals/LegR"]
+transform = Transform3D(1, 0, 0, 0, 0.85, 0, 0, 0, 1, 0, -0.98, -0.08)
+mesh = SubResource("FootMesh_1")
+material_override = SubResource("ArmorMat_3")
+
 [node name="CameraPitch" type="Node3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.40, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.58, 0)
 
 [node name="RecoilPivot" type="Node3D" parent="CameraPitch"]
 
@@ -200,7 +228,7 @@ margin = 0.05
 fov = 70.0
 
 [node name="WeaponMount" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.05, -0.40)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.06, 1.24, -0.42)
 
 [node name="Rifle" parent="WeaponMount" instance=ExtResource("8")]
 
@@ -210,7 +238,7 @@ max_health = 100.0
 
 [node name="MovementComponent" type="Node" parent="."]
 script = ExtResource("3")
-standing_height = 1.7
+standing_height = 1.85
 crouch_height = 1.0
 
 [node name="WeaponComponent" type="Node3D" parent="."]
@@ -219,10 +247,27 @@ script = ExtResource("4")
 [node name="HumanoidAnimator" type="Node" parent="."]
 script = ExtResource("7")
 visuals_path = NodePath("../Visuals")
+torso_path = NodePath("../Visuals/TorsoRig")
+head_path = NodePath("../Visuals/TorsoRig/Head")
 arm_l_path = NodePath("../Visuals/ArmL")
 arm_r_path = NodePath("../Visuals/ArmR")
 leg_l_path = NodePath("../Visuals/LegL")
 leg_r_path = NodePath("../Visuals/LegR")
+arm_hold_x = 1.18
+leg_walk_amp = 0.68
+arm_walk_amp = 0.09
+crouch_drop = 0.26
+walk_freq_factor = 1.55
+smooth_speed = 11.0
+torso_bob_amp = 0.045
+torso_roll_amp = 0.10
+torso_yaw_amp = 0.06
+head_counter_roll = 0.06
+head_counter_yaw = 0.04
+arm_sway_z = 0.18
+arm_yaw_sway = 0.10
+leg_splay_z = 0.07
+idle_breath_amp = 0.008
 
 [node name="WeaponVFX" type="Node3D" parent="."]
 script = ExtResource("6")
