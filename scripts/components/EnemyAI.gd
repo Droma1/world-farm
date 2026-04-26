@@ -40,6 +40,13 @@ func _ready() -> void:
 		if data and data.weapon:
 			weapon.equip(data.weapon)
 
+	# Empezar agresivo: si hay un Player en la escena, ir directamente a
+	# CHASE en vez de quedarse en IDLE esperando entrar en detection_range.
+	# Esto es lo que el jugador espera en un mapa de entrenamiento: los
+	# enemigos vienen a por él desde el momento del spawn.
+	if GameState.local_player != null:
+		state = State.CHASE
+
 
 func mark_dead() -> void:
 	if state == State.DEAD:
@@ -52,6 +59,10 @@ func mark_dead() -> void:
 
 func _physics_process(delta: float) -> void:
 	if state == State.DEAD or movement == null:
+		return
+	# Si el juego no está activo (game over / victoria), congelar enemigos.
+	if GameState.mode != GameState.Mode.PLAYING:
+		movement.external_wish_dir = Vector3.ZERO
 		return
 	var player := GameState.local_player as Node3D
 	if player == null:

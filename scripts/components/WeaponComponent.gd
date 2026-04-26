@@ -120,6 +120,11 @@ func _hitscan(origin: Vector3, dir: Vector3) -> Dictionary:
 	if hp:
 		hp.take_damage(current.damage, get_parent())
 		EventBus.damage_dealt.emit(collider, current.damage, get_parent())
+	EventBus.impact.emit(
+		result.get("position", Vector3.ZERO),
+		result.get("normal", Vector3.UP),
+		collider
+	)
 	return result
 
 

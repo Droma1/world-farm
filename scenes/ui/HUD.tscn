@@ -5,6 +5,10 @@
 [node name="HUD" type="CanvasLayer"]
 script = ExtResource("1")
 
+; ============================================================
+;  ROOT — gameplay HUD (no procesa cuando paused)
+; ============================================================
+
 [node name="Root" type="Control" parent="."]
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -16,6 +20,43 @@ anchor_bottom = 1.0
 color = Color(0.85, 0.05, 0.05, 1)
 mouse_filter = 2
 modulate = Color(1, 1, 1, 0)
+
+[node name="EndOverlay" type="ColorRect" parent="Root"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.65)
+mouse_filter = 2
+visible = false
+
+[node name="EndTitle" type="Label" parent="Root/EndOverlay"]
+anchor_left = 0.5
+anchor_top = 0.4
+anchor_right = 0.5
+anchor_bottom = 0.4
+offset_left = -300.0
+offset_top = -40.0
+offset_right = 300.0
+offset_bottom = 40.0
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 64
+text = "DERROTADO"
+mouse_filter = 2
+
+[node name="EndHint" type="Label" parent="Root/EndOverlay"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -250.0
+offset_top = 30.0
+offset_right = 250.0
+offset_bottom = 70.0
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 22
+modulate = Color(0.85, 0.85, 0.7, 1)
+text = "R: reintentar"
+mouse_filter = 2
 
 [node name="Crosshair" type="Control" parent="Root"]
 anchor_left = 0.5
@@ -58,6 +99,21 @@ offset_bottom = 1.5
 color = Color(1, 0.85, 0.4, 1)
 mouse_filter = 2
 
+[node name="ScorePanel" type="Control" parent="Root"]
+offset_left = 24.0
+offset_top = 24.0
+offset_right = 280.0
+offset_bottom = 64.0
+mouse_filter = 2
+
+[node name="ScoreLabel" type="Label" parent="Root/ScorePanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_font_sizes/font_size = 24
+modulate = Color(1, 0.95, 0.7, 1)
+text = "SCORE  0"
+mouse_filter = 2
+
 [node name="HealthPanel" type="Control" parent="Root"]
 anchor_top = 1.0
 anchor_bottom = 1.0
@@ -84,20 +140,58 @@ value = 100.0
 show_percentage = false
 mouse_filter = 2
 
+[node name="WavePanel" type="Control" parent="Root"]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 24.0
+offset_right = 200.0
+offset_bottom = 90.0
+mouse_filter = 2
+
+[node name="WaveLabel" type="Label" parent="Root/WavePanel"]
+anchor_right = 1.0
+offset_bottom = 36.0
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 28
+text = "PREPARANDO..."
+mouse_filter = 2
+
+[node name="EnemiesLabel" type="Label" parent="Root/WavePanel"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -28.0
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+modulate = Color(0.9, 0.85, 0.7, 1)
+text = ""
+mouse_filter = 2
+
 [node name="AmmoPanel" type="Control" parent="Root"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -280.0
-offset_top = -100.0
+offset_left = -300.0
+offset_top = -120.0
 offset_right = -24.0
 offset_bottom = -24.0
+mouse_filter = 2
+
+[node name="WeaponNameLabel" type="Label" parent="Root/AmmoPanel"]
+anchor_right = 1.0
+offset_bottom = 24.0
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 18
+modulate = Color(0.85, 0.95, 1, 1)
+text = "Rifle de Asalto"
 mouse_filter = 2
 
 [node name="AmmoLabel" type="Label" parent="Root/AmmoPanel"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_top = 24.0
 offset_bottom = -24.0
 horizontal_alignment = 2
 vertical_alignment = 2
@@ -117,3 +211,76 @@ modulate = Color(1, 0.7, 0.3, 1)
 text = "RECARGANDO..."
 mouse_filter = 2
 visible = false
+
+; ============================================================
+;  PAUSE MENU — process_mode ALWAYS para responder paused
+; ============================================================
+
+[node name="PauseMenu" type="Control" parent="."]
+process_mode = 3
+anchor_right = 1.0
+anchor_bottom = 1.0
+visible = false
+
+[node name="BG" type="ColorRect" parent="PauseMenu"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.75)
+mouse_filter = 2
+
+[node name="Container" type="VBoxContainer" parent="PauseMenu"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -200.0
+offset_right = 220.0
+offset_bottom = 200.0
+theme_override_constants/separation = 16
+
+[node name="Title" type="Label" parent="PauseMenu/Container"]
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 48
+text = "PAUSA"
+
+[node name="SensRow" type="HBoxContainer" parent="PauseMenu/Container"]
+
+[node name="SensLabel" type="Label" parent="PauseMenu/Container/SensRow"]
+custom_minimum_size = Vector2(160, 0)
+text = "Sensibilidad"
+theme_override_font_sizes/font_size = 18
+
+[node name="SensSlider" type="HSlider" parent="PauseMenu/Container/SensRow"]
+custom_minimum_size = Vector2(240, 0)
+min_value = 0.0005
+max_value = 0.012
+step = 0.0001
+value = 0.003
+
+[node name="VolRow" type="HBoxContainer" parent="PauseMenu/Container"]
+
+[node name="VolLabel" type="Label" parent="PauseMenu/Container/VolRow"]
+custom_minimum_size = Vector2(160, 0)
+text = "Volumen master"
+theme_override_font_sizes/font_size = 18
+
+[node name="VolSlider" type="HSlider" parent="PauseMenu/Container/VolRow"]
+custom_minimum_size = Vector2(240, 0)
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.8
+
+[node name="Spacer" type="Control" parent="PauseMenu/Container"]
+custom_minimum_size = Vector2(0, 12)
+
+[node name="ResumeButton" type="Button" parent="PauseMenu/Container"]
+custom_minimum_size = Vector2(0, 44)
+text = "Reanudar"
+theme_override_font_sizes/font_size = 22
+
+[node name="QuitButton" type="Button" parent="PauseMenu/Container"]
+custom_minimum_size = Vector2(0, 44)
+text = "Salir al escritorio"
+theme_override_font_sizes/font_size = 22

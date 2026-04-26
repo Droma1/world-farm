@@ -1,14 +1,26 @@
 class_name HUD
 extends CanvasLayer
-## HUD del Player local: crosshair + barra de vida + ammo + aviso de
-## recarga + flash rojo al recibir daño. Se vincula al Player vía
-## GameState.local_player y se rebinda automáticamente si cambia.
+## HUD del Player local: crosshair, vida, ammo, recarga, score, oleadas,
+## flash de daño, overlay de game-over/victoria, pause menu con sliders.
 
 @onready var health_bar: ProgressBar = $Root/HealthPanel/HealthBar
 @onready var health_label: Label = $Root/HealthPanel/HealthLabel
 @onready var ammo_label: Label = $Root/AmmoPanel/AmmoLabel
 @onready var reload_label: Label = $Root/AmmoPanel/ReloadLabel
+@onready var weapon_name_label: Label = $Root/AmmoPanel/WeaponNameLabel
 @onready var damage_vignette: ColorRect = $Root/DamageVignette
+@onready var wave_label: Label = $Root/WavePanel/WaveLabel
+@onready var enemies_label: Label = $Root/WavePanel/EnemiesLabel
+@onready var end_overlay: ColorRect = $Root/EndOverlay
+@onready var end_title: Label = $Root/EndOverlay/EndTitle
+@onready var end_hint: Label = $Root/EndOverlay/EndHint
+@onready var score_label: Label = $Root/ScorePanel/ScoreLabel
+
+@onready var pause_menu: Control = $PauseMenu
+@onready var sens_slider: HSlider = $PauseMenu/Container/SensRow/SensSlider
+@onready var vol_slider: HSlider = $PauseMenu/Container/VolRow/VolSlider
+@onready var resume_btn: Button = $PauseMenu/Container/ResumeButton
+@onready var quit_btn: Button = $PauseMenu/Container/QuitButton
 
 var _player: Player
 var _flash_tween: Tween
@@ -17,10 +29,75 @@ var _flash_tween: Tween
 func _ready() -> void:
 	reload_label.visible = false
 	damage_vignette.modulate.a = 0.0
+	end_overlay.visible = false
+	pause_menu.visible = false
+	wave_label.text = "PREPARANDO..."
+	enemies_label.text = ""
+	score_label.text = "SCORE  0"
+
+	# Sliders sincronizados con Settings
+	sens_slider.value = Settings.mouse_sensitivity
+	vol_slider.value = Settings.master_volume
+	sens_slider.value_changed.connect(_on_sens_changed)
+	vol_slider.value_changed.connect(_on_vol_changed)
+	resume_btn.pressed.connect(_toggle_pause)
+	quit_btn.pressed.connect(_on_quit_pressed)
+
 	GameState.local_player_changed.connect(_on_local_player_changed)
+	GameState.mode_changed.connect(_on_game_mode_changed)
+	GameState.score_changed.connect(_on_score_changed)
+	EventBus.wave_started.connect(_on_wave_started)
+	EventBus.wave_alive_count_changed.connect(_on_wave_alive_changed)
+	EventBus.wave_completed.connect(_on_wave_completed)
+	EventBus.all_waves_completed.connect(_on_all_waves_completed)
+	EventBus.weapon_swapped.connect(_on_weapon_swapped)
+
 	if GameState.local_player is Player:
 		_bind(GameState.local_player)
 
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed:
+		var k := event as InputEventKey
+		# R en estados terminales: reload scene
+		if (GameState.mode == GameState.Mode.GAME_OVER
+				or GameState.mode == GameState.Mode.VICTORY) and k.keycode == KEY_R:
+			get_tree().reload_current_scene()
+			get_viewport().set_input_as_handled()
+		# Esc: pause toggle (solo cuando estamos jugando o ya pausado)
+		elif k.keycode == KEY_ESCAPE and GameState.mode == GameState.Mode.PLAYING:
+			_toggle_pause()
+			get_viewport().set_input_as_handled()
+
+
+# ============================================================
+#  Pause
+# ============================================================
+
+func _toggle_pause() -> void:
+	var paused := not get_tree().paused
+	get_tree().paused = paused
+	pause_menu.visible = paused
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE if paused else Input.MOUSE_MODE_CAPTURED
+
+
+func _on_sens_changed(value: float) -> void:
+	Settings.mouse_sensitivity = value
+	if _player:
+		_player._mouse_sensitivity = value
+
+
+func _on_vol_changed(value: float) -> void:
+	Settings.master_volume = value
+
+
+func _on_quit_pressed() -> void:
+	get_tree().quit()
+
+
+# ============================================================
+#  Player binding
+# ============================================================
 
 func _on_local_player_changed(player: Node) -> void:
 	if player == null:
@@ -34,44 +111,30 @@ func _bind(player: Player) -> void:
 	_player = player
 	if not is_instance_valid(_player):
 		return
-
 	if _player.health:
 		_player.health.damaged.connect(_on_player_damaged)
 		_player.health.healed.connect(_on_player_healed)
 		_refresh_health()
-
 	if _player.weapon:
 		_player.weapon.ammo_changed.connect(_on_ammo_changed)
 		_player.weapon.weapon_equipped.connect(_on_weapon_equipped)
 		_player.weapon.reload_started.connect(_on_reload_started)
 		_player.weapon.reload_finished.connect(_on_reload_finished)
 		if _player.weapon.current:
+			_on_weapon_equipped(_player.weapon.current)
 			_on_ammo_changed(_player.weapon.in_mag, _player.weapon.reserve)
 
 
 func _unbind() -> void:
-	if _player == null or not is_instance_valid(_player):
-		_player = null
-		return
-	if _player.health:
-		if _player.health.damaged.is_connected(_on_player_damaged):
-			_player.health.damaged.disconnect(_on_player_damaged)
-		if _player.health.healed.is_connected(_on_player_healed):
-			_player.health.healed.disconnect(_on_player_healed)
-	if _player.weapon:
-		if _player.weapon.ammo_changed.is_connected(_on_ammo_changed):
-			_player.weapon.ammo_changed.disconnect(_on_ammo_changed)
-		if _player.weapon.weapon_equipped.is_connected(_on_weapon_equipped):
-			_player.weapon.weapon_equipped.disconnect(_on_weapon_equipped)
-		if _player.weapon.reload_started.is_connected(_on_reload_started):
-			_player.weapon.reload_started.disconnect(_on_reload_started)
-		if _player.weapon.reload_finished.is_connected(_on_reload_finished):
-			_player.weapon.reload_finished.disconnect(_on_reload_finished)
+	# En SP los signals se auto-desconectan al freeing del Player. Para MP /
+	# respawn-sin-reload necesitaríamos disconnect explícitos aquí.
 	_player = null
 	reload_label.visible = false
 
 
-# --- Health ---
+# ============================================================
+#  Health
+# ============================================================
 
 func _refresh_health() -> void:
 	if _player == null or _player.health == null:
@@ -100,9 +163,13 @@ func _flash_damage() -> void:
 	_flash_tween.tween_property(damage_vignette, "modulate:a", 0.0, 0.45)
 
 
-# --- Weapon ---
+# ============================================================
+#  Weapon
+# ============================================================
 
-func _on_weapon_equipped(_data: WeaponData) -> void:
+func _on_weapon_equipped(data: WeaponData) -> void:
+	if data:
+		weapon_name_label.text = data.display_name
 	if _player and _player.weapon:
 		_on_ammo_changed(_player.weapon.in_mag, _player.weapon.reserve)
 
@@ -117,3 +184,58 @@ func _on_reload_started() -> void:
 
 func _on_reload_finished() -> void:
 	reload_label.visible = false
+
+
+func _on_weapon_swapped(weapon_data: Resource, _slot: int) -> void:
+	if weapon_data and "display_name" in weapon_data:
+		weapon_name_label.text = weapon_data.display_name
+
+
+# ============================================================
+#  Waves & game state
+# ============================================================
+
+func _on_wave_started(index: int, total: int, data: Resource) -> void:
+	var wave_name: String = data.name if data and "name" in data else "Wave"
+	wave_label.text = "OLEADA %d / %d  —  %s" % [index + 1, total, wave_name]
+
+
+func _on_wave_alive_changed(count: int) -> void:
+	enemies_label.text = "%d enemigos restantes" % count if count > 0 else ""
+
+
+func _on_wave_completed(_index: int) -> void:
+	wave_label.text = "¡OLEADA SUPERADA!"
+	enemies_label.text = ""
+
+
+func _on_all_waves_completed() -> void:
+	wave_label.text = "¡VICTORIA!"
+	enemies_label.text = ""
+
+
+func _on_score_changed(new_score: int) -> void:
+	score_label.text = "SCORE  %d" % new_score
+
+
+func _on_game_mode_changed(new_mode: int) -> void:
+	match new_mode:
+		GameState.Mode.GAME_OVER:
+			end_overlay.visible = true
+			end_title.text = "DERROTADO"
+			end_title.modulate = Color(1, 0.4, 0.35, 1)
+			end_hint.text = "R: reintentar"
+			# Si estábamos pausados, despausar (el end overlay reemplaza el pause)
+			if get_tree().paused:
+				get_tree().paused = false
+				pause_menu.visible = false
+		GameState.Mode.VICTORY:
+			end_overlay.visible = true
+			end_title.text = "¡VICTORIA!"
+			end_title.modulate = Color(0.5, 1, 0.6, 1)
+			end_hint.text = "R: jugar de nuevo"
+			if get_tree().paused:
+				get_tree().paused = false
+				pause_menu.visible = false
+		GameState.Mode.PLAYING:
+			end_overlay.visible = false

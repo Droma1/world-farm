@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/entities/Enemy.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/components/HealthComponent.gd" id="2"]
@@ -9,13 +9,19 @@
 [ext_resource type="Script" path="res://scripts/components/WeaponVFX.gd" id="7"]
 [ext_resource type="Script" path="res://scripts/components/HumanoidAnimator.gd" id="8"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/Rifle.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://scenes/world/HealthPickup.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://scenes/world/AmmoPickup.tscn" id="11"]
+[ext_resource type="Texture2D" uid="uid://cctu4lkyb7g6y" path="res://assets/textures/proto/wall.png" id="TexBody"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_E"]
 height = 1.8
 radius = 0.35
 
 [sub_resource type="StandardMaterial3D" id="EnemyBodyMat"]
-albedo_color = Color(0.78, 0.32, 0.22, 1)
+albedo_color = Color(1.0, 0.45, 0.30, 1)
+albedo_texture = ExtResource("TexBody")
+uv1_triplanar = true
+uv1_scale = Vector3(6, 6, 6)
 roughness = 0.7
 
 [sub_resource type="StandardMaterial3D" id="EnemyHeadMat"]
@@ -40,6 +46,8 @@ radius = 0.08
 [node name="Enemy" type="CharacterBody3D"]
 script = ExtResource("1")
 data = ExtResource("6")
+health_pickup_scene = ExtResource("10")
+ammo_pickup_scene = ExtResource("11")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)

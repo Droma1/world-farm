@@ -73,6 +73,8 @@ func _process(delta: float) -> void:
 
 
 func _on_shot_fired(_data: WeaponData, end_point: Vector3, hit_data: Dictionary) -> void:
+	if not is_inside_tree():
+		return
 	if _muzzle_flash:
 		_muzzle_flash.visible = true
 		_flash_timer = muzzle_flash_duration

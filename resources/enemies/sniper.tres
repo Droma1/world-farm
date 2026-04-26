@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/EnemyData.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/weapons/rifle_sniper.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Sniper"
+max_health = 35.0
+move_speed = 2.5
+weapon = ExtResource("2")
+score_value = 200
+body_tint = Color(0.55, 0.45, 0.85, 1)
+drop_chance = 0.45
+detection_range = 80.0
+attack_range = 30.0
+stop_range = 18.0
+lose_target_range = 100.0
+turn_speed = 5.0

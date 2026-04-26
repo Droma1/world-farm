@@ -3,11 +3,24 @@ extends Node
 ## solo flags, contadores y referencias compartidas.
 
 signal local_player_changed(player: Node)
+signal mode_changed(new_mode: int)
+signal score_changed(new_score: int)
 
-enum Mode { MENU, PLAYING, PAUSED, GAME_OVER }
+enum Mode { MENU, PLAYING, PAUSED, GAME_OVER, VICTORY }
 
-var mode: Mode = Mode.PLAYING
-var score: int = 0
+var mode: Mode = Mode.PLAYING:
+	set(value):
+		if mode == value:
+			return
+		mode = value
+		mode_changed.emit(value)
+
+var score: int = 0:
+	set(value):
+		if score == value:
+			return
+		score = value
+		score_changed.emit(value)
 
 # Referencia al Player controlado por este cliente. La asigna el propio
 # Player en _ready(). Cualquier UI/HUD se suscribe a local_player_changed
@@ -21,7 +34,7 @@ var local_player: Node = null:
 
 
 func add_score(points: int) -> void:
-	score += points
+	score = score + points
 
 
 func reset() -> void:

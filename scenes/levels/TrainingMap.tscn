@@ -1,10 +1,51 @@
-[gd_scene load_steps=48 format=3]
+[gd_scene load_steps=51 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/characters/player/Player.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/TargetDummy.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/characters/enemies/Enemy.tscn" id="4"]
 [ext_resource type="Script" path="res://scripts/levels/TrainingMap.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/systems/spawning/WaveSystem.gd" id="6"]
+[ext_resource type="Script" path="res://scripts/resources/WaveData.gd" id="7"]
+[ext_resource type="Texture2D" uid="uid://ccf8a0plhuq7l" path="res://assets/textures/proto/floor.png" id="TexFloor"]
+[ext_resource type="Texture2D" uid="uid://cctu4lkyb7g6y" path="res://assets/textures/proto/wall.png" id="TexWall"]
+[ext_resource type="Texture2D" uid="uid://bgqvy0dyx8rug" path="res://assets/textures/proto/crate.png" id="TexCrate"]
+[ext_resource type="Texture2D" uid="uid://byw4i0pxlxhye" path="res://assets/textures/proto/platform.png" id="TexPlatform"]
+[ext_resource type="Resource" path="res://resources/enemies/grunt.tres" id="EnemyGrunt"]
+[ext_resource type="Resource" path="res://resources/enemies/heavy.tres" id="EnemyHeavy"]
+[ext_resource type="Resource" path="res://resources/enemies/sniper.tres" id="EnemySniper"]
+
+[sub_resource type="Resource" id="Wave1"]
+script = ExtResource("7")
+name = "Oleada 1 — Reconocimiento"
+enemy_scene = ExtResource("4")
+enemy_data_list = Array[Resource]([ExtResource("EnemyGrunt")])
+enemy_counts = Array[int]([3])
+spawn_interval = 1.5
+
+[sub_resource type="Resource" id="Wave2"]
+script = ExtResource("7")
+name = "Oleada 2 — Refuerzos"
+enemy_scene = ExtResource("4")
+enemy_data_list = Array[Resource]([ExtResource("EnemyGrunt"), ExtResource("EnemyHeavy")])
+enemy_counts = Array[int]([4, 1])
+spawn_interval = 1.2
+
+[sub_resource type="Resource" id="Wave3"]
+script = ExtResource("7")
+name = "Oleada 3 — Francotiradores"
+enemy_scene = ExtResource("4")
+enemy_data_list = Array[Resource]([ExtResource("EnemySniper"), ExtResource("EnemyGrunt")])
+enemy_counts = Array[int]([2, 2])
+spawn_interval = 1.4
+
+[sub_resource type="Resource" id="Wave4"]
+script = ExtResource("7")
+name = "Oleada 4 — Ofensiva final"
+enemy_scene = ExtResource("4")
+enemy_data_list = Array[Resource]([ExtResource("EnemyGrunt"), ExtResource("EnemyHeavy"), ExtResource("EnemySniper")])
+enemy_counts = Array[int]([5, 2, 2])
+spawn_interval = 0.9
 
 [sub_resource type="NavigationMesh" id="NavMesh"]
 geometry_parsed_geometry_type = 1
@@ -46,36 +87,60 @@ fog_density = 0.0025
 
 ; --- Materials ---
 [sub_resource type="StandardMaterial3D" id="FloorMat"]
-albedo_color = Color(0.30, 0.34, 0.30, 1)
+albedo_color = Color(1, 1, 1, 1)
+albedo_texture = ExtResource("TexFloor")
+uv1_triplanar = true
+uv1_scale = Vector3(0.5, 0.5, 0.5)
 roughness = 0.95
 
 [sub_resource type="StandardMaterial3D" id="PerimeterMat"]
-albedo_color = Color(0.62, 0.55, 0.42, 1)
+albedo_color = Color(1, 1, 1, 1)
+albedo_texture = ExtResource("TexWall")
+uv1_triplanar = true
+uv1_scale = Vector3(0.5, 0.5, 0.5)
 roughness = 0.85
 
 [sub_resource type="StandardMaterial3D" id="BackstopMat"]
-albedo_color = Color(0.38, 0.34, 0.30, 1)
+albedo_color = Color(1, 1, 1, 1)
+albedo_texture = ExtResource("TexWall")
+uv1_triplanar = true
+uv1_scale = Vector3(0.5, 0.5, 0.5)
 roughness = 0.9
 
 [sub_resource type="StandardMaterial3D" id="CoverMat"]
-albedo_color = Color(0.50, 0.34, 0.20, 1)
+albedo_color = Color(1, 1, 1, 1)
+albedo_texture = ExtResource("TexCrate")
+uv1_triplanar = true
+uv1_scale = Vector3(1, 1, 1)
 roughness = 0.75
 
 [sub_resource type="StandardMaterial3D" id="CrateMat"]
-albedo_color = Color(0.28, 0.28, 0.30, 1)
+albedo_color = Color(0.65, 0.65, 0.7, 1)
+albedo_texture = ExtResource("TexWall")
+uv1_triplanar = true
+uv1_scale = Vector3(0.6, 0.6, 0.6)
 metallic = 0.2
 roughness = 0.6
 
 [sub_resource type="StandardMaterial3D" id="PillarMat"]
-albedo_color = Color(0.55, 0.55, 0.58, 1)
+albedo_color = Color(1, 1, 1, 1)
+albedo_texture = ExtResource("TexWall")
+uv1_triplanar = true
+uv1_scale = Vector3(0.7, 0.7, 0.7)
 roughness = 0.85
 
 [sub_resource type="StandardMaterial3D" id="PlatformMat"]
-albedo_color = Color(0.45, 0.48, 0.52, 1)
+albedo_color = Color(1, 1, 1, 1)
+albedo_texture = ExtResource("TexPlatform")
+uv1_triplanar = true
+uv1_scale = Vector3(0.5, 0.5, 0.5)
 roughness = 0.6
 
 [sub_resource type="StandardMaterial3D" id="MazeMat"]
-albedo_color = Color(0.40, 0.42, 0.45, 1)
+albedo_color = Color(1, 1, 1, 1)
+albedo_texture = ExtResource("TexCrate")
+uv1_triplanar = true
+uv1_scale = Vector3(0.6, 0.6, 0.6)
 roughness = 0.8
 
 [sub_resource type="StandardMaterial3D" id="TunnelMat"]
@@ -433,21 +498,31 @@ material_override = SubResource("TunnelMat")
 [node name="Player" parent="." instance=ExtResource("1")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 25)
 
-; --- Enemigos en posiciones tácticas ---
-[node name="Enemy_Center" parent="." instance=ExtResource("4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -18)
+; --- Spawn points para WaveSystem ---
+[node name="SpawnPoints" type="Node3D" parent="."]
 
-[node name="Enemy_Pillar" parent="." instance=ExtResource("4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, -6)
+[node name="SP_Backstop" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -36)
 
-[node name="Enemy_Crate" parent="." instance=ExtResource("4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 12, 0, -12)
+[node name="SP_Crate_L" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -14, 0, -16)
 
-[node name="Enemy_HighGround" parent="." instance=ExtResource("4")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 36, 2.5, -10)
+[node name="SP_Crate_R" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, -16)
 
-[node name="Enemy_Maze" parent="." instance=ExtResource("4")]
+[node name="SP_Maze" type="Marker3D" parent="SpawnPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 0, 6)
+
+[node name="SP_Pillar" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -10)
+
+; --- WaveSystem ---
+[node name="WaveSystem" type="Node" parent="."]
+script = ExtResource("6")
+waves = Array[Resource]([SubResource("Wave1"), SubResource("Wave2"), SubResource("Wave3"), SubResource("Wave4")])
+spawn_points_path = NodePath("../SpawnPoints")
+initial_delay = 4.0
+time_between_waves = 5.0
 
 ; --- HUD ---
 [node name="HUD" parent="." instance=ExtResource("3")]

@@ -86,6 +86,19 @@ func flash_hit(duration: float = 0.12) -> void:
 	_hit_timer = duration
 
 
+func tint_body(color: Color) -> void:
+	## Multiplica el albedo de los meshes por `color`. Usado por enemigos
+	## para diferenciar variantes (Heavy = oscuro, Sniper = púrpura, etc).
+	if color == Color(1, 1, 1, 1):
+		return
+	for m in _meshes:
+		var mat: StandardMaterial3D = m.material_override
+		if mat:
+			var dup := mat.duplicate() as StandardMaterial3D
+			dup.albedo_color = mat.albedo_color * color
+			m.material_override = dup
+
+
 func _process(delta: float) -> void:
 	# Hit flash timeout
 	if _hit_timer > 0.0:

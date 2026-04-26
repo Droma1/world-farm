@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/EnemyData.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/weapons/rifle_enemy.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Heavy"
+max_health = 180.0
+move_speed = 1.8
+weapon = ExtResource("2")
+score_value = 300
+body_tint = Color(0.55, 0.30, 0.30, 1)
+drop_chance = 0.65
+detection_range = 65.0
+attack_range = 16.0
+stop_range = 8.0
+lose_target_range = 85.0
+turn_speed = 4.0

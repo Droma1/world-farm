@@ -12,6 +12,7 @@ extends Node
 signal jumped
 signal landed
 signal crouch_changed(crouching: bool)
+signal step  ## Emitido cada step_distance metros caminados en el suelo.
 
 @export var walk_speed: float = 5.0
 @export var sprint_speed: float = 8.0
@@ -25,6 +26,11 @@ signal crouch_changed(crouching: bool)
 @export var standing_height: float = 1.8
 @export var crouch_height: float = 1.0
 @export var crouch_resize_speed: float = 10.0
+
+@export_group("Footsteps")
+@export var step_distance: float = 1.7         # m entre pasos a velocidad normal
+@export var step_distance_sprint: float = 2.2  # zancadas más largas en sprint
+@export var step_min_speed: float = 0.5
 
 # Estado público (animator lee)
 var local_velocity: Vector3 = Vector3.ZERO
@@ -40,6 +46,7 @@ var body: CharacterBody3D
 var _was_on_floor: bool = false
 var _gravity: float = ProjectSettings.get_setting("physics/3d/default_gravity", 9.8)
 var _collision_shape: CollisionShape3D
+var _walk_distance_acc: float = 0.0
 
 
 func _ready() -> void:
@@ -121,6 +128,22 @@ func _physics_process(delta: float) -> void:
 
 	# Local velocity: animator decide caminar adelante / atrás
 	local_velocity = body.global_transform.basis.inverse() * Vector3(body.velocity.x, 0.0, body.velocity.z)
+
+	# Footsteps: acumula distancia mientras toca suelo y emite cada step_distance.
+	if body.is_on_floor():
+		var hspeed: float = Vector2(body.velocity.x, body.velocity.z).length()
+		if hspeed > step_min_speed:
+			_walk_distance_acc += hspeed * delta
+			var threshold: float = step_distance_sprint if is_sprinting else step_distance
+			if is_crouching:
+				threshold *= 1.4  # pasos más espaciados al agacharse
+			if _walk_distance_acc >= threshold:
+				_walk_distance_acc = 0.0
+				step.emit()
+		else:
+			_walk_distance_acc = 0.0
+	else:
+		_walk_distance_acc = 0.0
 
 	# Resize dinámico de la cápsula (solo si la shape es CapsuleShape3D)
 	if _collision_shape and _collision_shape.shape is CapsuleShape3D:

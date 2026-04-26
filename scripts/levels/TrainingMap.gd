@@ -15,6 +15,9 @@ var _nav_region: NavigationRegion3D
 
 
 func _ready() -> void:
+	# Reset al cargar (también después de un retry tras game over).
+	GameState.mode = GameState.Mode.PLAYING
+
 	_nav_region = get_node_or_null(nav_region_path) as NavigationRegion3D
 	if _nav_region == null:
 		push_warning("TrainingMap: NavigationRegion3D no encontrado en %s" % nav_region_path)

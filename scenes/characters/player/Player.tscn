@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://scripts/entities/Player.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/components/HealthComponent.gd" id="2"]
@@ -8,13 +8,17 @@
 [ext_resource type="Script" path="res://scripts/components/WeaponVFX.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/components/HumanoidAnimator.gd" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/weapons/Rifle.tscn" id="8"]
+[ext_resource type="Texture2D" uid="uid://cctu4lkyb7g6y" path="res://assets/textures/proto/wall.png" id="TexBody"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 height = 1.8
 radius = 0.35
 
 [sub_resource type="StandardMaterial3D" id="BodyMat_1"]
-albedo_color = Color(0.22, 0.5, 0.85, 1)
+albedo_color = Color(0.40, 0.65, 0.95, 1)
+albedo_texture = ExtResource("TexBody")
+uv1_triplanar = true
+uv1_scale = Vector3(6, 6, 6)
 roughness = 0.6
 
 [sub_resource type="StandardMaterial3D" id="HeadMat_1"]

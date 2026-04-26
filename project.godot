@@ -20,7 +20,9 @@ config/icon="res://icon.svg"
 EventBus="*res://scripts/autoload/EventBus.gd"
 GameState="*res://scripts/autoload/GameState.gd"
 RNG="*res://scripts/autoload/RNG.gd"
+Settings="*res://scripts/autoload/Settings.gd"
 InputSetup="*res://scripts/autoload/InputSetup.gd"
+AudioManager="*res://scripts/autoload/AudioManager.gd"
 
 [physics]
 
