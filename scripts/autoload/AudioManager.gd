@@ -23,11 +23,11 @@ const STREAM_VARIATIONS: Dictionary = {
 		"res://assets/audio/sfx/impact/flesh_02.ogg",
 	],
 	&"footstep": [
-		"res://assets/audio/sfx/footstep/concrete_01.ogg",
-		"res://assets/audio/sfx/footstep/concrete_02.ogg",
-		"res://assets/audio/sfx/footstep/concrete_03.ogg",
-		"res://assets/audio/sfx/footstep/concrete_04.ogg",
-		"res://assets/audio/sfx/footstep/concrete_05.ogg",
+		"res://assets/audio/sfx/footstep/step_01.ogg",
+		"res://assets/audio/sfx/footstep/step_02.ogg",
+		"res://assets/audio/sfx/footstep/step_03.ogg",
+		"res://assets/audio/sfx/footstep/step_04.ogg",
+		"res://assets/audio/sfx/footstep/step_05.ogg",
 	],
 	&"reload_click": [
 		"res://assets/audio/sfx/weapon/reload_click.ogg",

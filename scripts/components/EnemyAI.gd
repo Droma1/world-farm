@@ -22,6 +22,13 @@ var weapon: WeaponComponent
 var aim_provider: Node3D
 var nav_agent: NavigationAgent3D
 
+# Strafe en ATTACK: el enemigo da pasos laterales aleatorios para no ser
+# un blanco estático. _strafe_remaining > 0 significa "moviéndose ahora".
+# _strafe_cooldown contabiliza el tiempo hasta el próximo strafe.
+var _strafe_cooldown: float = 1.5
+var _strafe_remaining: float = 0.0
+var _strafe_dir: Vector3 = Vector3.ZERO
+
 
 func _ready() -> void:
 	body = get_parent() as CharacterBody3D
@@ -98,8 +105,21 @@ func _physics_process(delta: float) -> void:
 				_face_direction(move_dir if move_dir.length_squared() > 0.01 else direct_dir, delta)
 
 		State.ATTACK:
-			movement.external_wish_dir = Vector3.ZERO
 			_face_direction(direct_dir, delta)
+			# Strafe: cada 1.5-3s, da un paso lateral 0.4-0.9s
+			_strafe_cooldown -= delta
+			if _strafe_remaining > 0.0:
+				_strafe_remaining -= delta
+				movement.external_wish_dir = _strafe_dir
+			elif _strafe_cooldown <= 0.0:
+				var sign_x: float = 1.0 if RNG.randf() < 0.5 else -1.0
+				# basis.x es el "right" del enemigo en mundo
+				_strafe_dir = body.global_transform.basis.x * sign_x
+				_strafe_remaining = RNG.randf_range(0.4, 0.9)
+				_strafe_cooldown = RNG.randf_range(1.5, 3.0) + _strafe_remaining
+				movement.external_wish_dir = _strafe_dir
+			else:
+				movement.external_wish_dir = Vector3.ZERO
 			if data == null:
 				return
 			if distance > data.attack_range * 1.15 or not _has_line_of_sight(player):

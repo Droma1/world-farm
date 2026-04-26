@@ -16,6 +16,7 @@ extends CanvasLayer
 @onready var end_hint: Label = $Root/EndOverlay/EndHint
 @onready var score_label: Label = $Root/ScorePanel/ScoreLabel
 
+@onready var hit_marker: Control = $Root/Crosshair/HitMarker
 @onready var pause_menu: Control = $PauseMenu
 @onready var sens_slider: HSlider = $PauseMenu/Container/SensRow/SensSlider
 @onready var vol_slider: HSlider = $PauseMenu/Container/VolRow/VolSlider
@@ -24,6 +25,7 @@ extends CanvasLayer
 
 var _player: Player
 var _flash_tween: Tween
+var _hit_marker_tween: Tween
 
 
 func _ready() -> void:
@@ -51,6 +53,8 @@ func _ready() -> void:
 	EventBus.wave_completed.connect(_on_wave_completed)
 	EventBus.all_waves_completed.connect(_on_all_waves_completed)
 	EventBus.weapon_swapped.connect(_on_weapon_swapped)
+	EventBus.damage_dealt.connect(_on_damage_dealt)
+	hit_marker.modulate.a = 0.0
 
 	if GameState.local_player is Player:
 		_bind(GameState.local_player)
@@ -161,6 +165,17 @@ func _flash_damage() -> void:
 	damage_vignette.modulate.a = 0.45
 	_flash_tween = create_tween()
 	_flash_tween.tween_property(damage_vignette, "modulate:a", 0.0, 0.45)
+
+
+func _on_damage_dealt(_target: Object, _amount: float, source: Node) -> void:
+	# Hit marker solo cuando NOSOTROS confirmamos un impacto.
+	if source != GameState.local_player:
+		return
+	if _hit_marker_tween and _hit_marker_tween.is_valid():
+		_hit_marker_tween.kill()
+	hit_marker.modulate.a = 1.0
+	_hit_marker_tween = create_tween()
+	_hit_marker_tween.tween_property(hit_marker, "modulate:a", 0.0, 0.18)
 
 
 # ============================================================

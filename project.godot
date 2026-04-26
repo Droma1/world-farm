@@ -23,6 +23,7 @@ RNG="*res://scripts/autoload/RNG.gd"
 Settings="*res://scripts/autoload/Settings.gd"
 InputSetup="*res://scripts/autoload/InputSetup.gd"
 AudioManager="*res://scripts/autoload/AudioManager.gd"
+DamageNumbers="*res://scripts/systems/vfx/DamageNumbers.gd"
 
 [physics]
 
