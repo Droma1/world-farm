@@ -1,16 +1,17 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://scripts/ui/MainMenu.gd" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/levels/TrainingMap.tscn" id="2"]
 [ext_resource type="PackedScene" path="res://scenes/characters/player/Player.tscn" id="3"]
 [ext_resource type="Script" path="res://scripts/ui/PlayerRotator.gd" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/characters/enemies/Enemy.tscn" id="5"]
 
 [sub_resource type="ProceduralSkyMaterial" id="MenuSky"]
-sky_top_color = Color(0.18, 0.32, 0.55, 1)
-sky_horizon_color = Color(0.85, 0.55, 0.30, 1)
-ground_bottom_color = Color(0.08, 0.10, 0.15, 1)
-ground_horizon_color = Color(0.55, 0.45, 0.40, 1)
-sun_angle_max = 30.0
+sky_top_color = Color(0.12, 0.19, 0.28, 1)
+sky_horizon_color = Color(0.47, 0.55, 0.58, 1)
+ground_bottom_color = Color(0.04, 0.05, 0.07, 1)
+ground_horizon_color = Color(0.22, 0.23, 0.22, 1)
+sun_angle_max = 24.0
 
 [sub_resource type="Sky" id="Sky_men"]
 sky_material = SubResource("MenuSky")
@@ -19,9 +20,80 @@ sky_material = SubResource("MenuSky")
 background_mode = 2
 sky = SubResource("Sky_men")
 ambient_light_source = 2
-ambient_light_color = Color(0.3, 0.3, 0.35, 1)
+ambient_light_color = Color(0.34, 0.36, 0.38, 1)
+reflected_light_source = 2
 tonemap_mode = 2
 glow_enabled = true
+glow_intensity = 0.3
+
+[sub_resource type="StandardMaterial3D" id="FloorMat"]
+albedo_color = Color(0.11, 0.13, 0.14, 1)
+metallic = 0.35
+roughness = 0.62
+
+[sub_resource type="StandardMaterial3D" id="PanelMat"]
+albedo_color = Color(0.06, 0.08, 0.10, 1)
+metallic = 0.55
+roughness = 0.48
+
+[sub_resource type="StandardMaterial3D" id="LineMat"]
+albedo_color = Color(0.20, 0.74, 0.88, 1)
+emission_enabled = true
+emission = Color(0.16, 0.60, 0.72, 1)
+emission_energy_multiplier = 1.4
+metallic = 0.15
+roughness = 0.22
+
+[sub_resource type="PlaneMesh" id="FloorMesh"]
+size = Vector2(8.5, 6.0)
+
+[sub_resource type="BoxMesh" id="BackPanelMesh"]
+size = Vector3(5.8, 2.8, 0.12)
+
+[sub_resource type="BoxMesh" id="LightStripMesh"]
+size = Vector3(0.06, 0.025, 4.6)
+
+[sub_resource type="StyleBoxFlat" id="ButtonNormal"]
+bg_color = Color(0.14, 0.18, 0.20, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.27, 0.38, 0.42, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 18.0
+content_margin_right = 18.0
+
+[sub_resource type="StyleBoxFlat" id="ButtonHover"]
+bg_color = Color(0.18, 0.32, 0.34, 0.96)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.31, 0.80, 0.86, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 18.0
+content_margin_right = 18.0
+
+[sub_resource type="StyleBoxFlat" id="ButtonPressed"]
+bg_color = Color(0.07, 0.12, 0.13, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.12, 0.55, 0.62, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 18.0
+content_margin_right = 18.0
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -45,101 +117,156 @@ stretch = true
 [node name="SubViewport" type="SubViewport" parent="SubViewportContainer"]
 handle_input_locally = false
 msaa_3d = 2
-size = Vector2i(1152, 648)
+screen_space_aa = 1
+size = Vector2i(1280, 720)
 render_target_update_mode = 4
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="SubViewportContainer/SubViewport"]
 environment = SubResource("Environment_light")
 
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport"]
-transform = Transform3D(-0.866025, -0.433013, 0.25, 0, 0.5, 0.866025, -0.5, 0.75, -0.433013, 0, 5, 0)
+[node name="Camera3D" type="Camera3D" parent="SubViewportContainer/SubViewport"]
+transform = Transform3D(0.953717, 0.0868241, -0.287071, 0, 0.95799, 0.286803, 0.300706, -0.273532, 0.913646, 2.58, 1.28, 4.75)
+current = true
+fov = 58.0
+
+[node name="KeyLight" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport"]
+transform = Transform3D(-0.875426, -0.33454, 0.348054, 0, 0.72176, 0.692143, -0.483352, 0.605835, -0.63187, 0, 5, 0)
+light_energy = 2.2
 shadow_enabled = true
 
-[node name="Camera3D" type="Camera3D" parent="SubViewportContainer/SubViewport"]
-transform = Transform3D(0.965926, 0.0669873, -0.25, 0, 0.965926, 0.258819, 0.258819, -0.25, 0.933013, 2.5, 1.2, 5)
-current = true
+[node name="RimLight" type="OmniLight3D" parent="SubViewportContainer/SubViewport"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.2, 1.9, 0.8)
+light_color = Color(0.38, 0.82, 0.94, 1)
+light_energy = 2.4
+omni_range = 4.5
+
+[node name="Hangar" type="Node3D" parent="SubViewportContainer/SubViewport"]
+
+[node name="Floor" type="MeshInstance3D" parent="SubViewportContainer/SubViewport/Hangar"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.35, -0.015, -0.25)
+mesh = SubResource("FloorMesh")
+material_override = SubResource("FloorMat")
+
+[node name="BackPanel" type="MeshInstance3D" parent="SubViewportContainer/SubViewport/Hangar"]
+transform = Transform3D(1, 0, 0, 0, 0.707107, 0.707107, 0, -0.707107, 0.707107, 2.55, 1.20, -2.05)
+mesh = SubResource("BackPanelMesh")
+material_override = SubResource("PanelMat")
+
+[node name="LightStripL" type="MeshInstance3D" parent="SubViewportContainer/SubViewport/Hangar"]
+transform = Transform3D(0.965926, 0, -0.258819, 0, 1, 0, 0.258819, 0, 0.965926, 1.0, 0.02, -0.1)
+mesh = SubResource("LightStripMesh")
+material_override = SubResource("LineMat")
+
+[node name="LightStripR" type="MeshInstance3D" parent="SubViewportContainer/SubViewport/Hangar"]
+transform = Transform3D(0.965926, 0, 0.258819, 0, 1, 0, -0.258819, 0, 0.965926, 3.85, 0.02, -0.1)
+mesh = SubResource("LightStripMesh")
+material_override = SubResource("LineMat")
 
 [node name="PlayerRotator" type="Node3D" parent="SubViewportContainer/SubViewport"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.5, 0, 1)
 script = ExtResource("4")
+hero_path = NodePath("Player")
+enemy_paths = [NodePath("EnemyLeft"), NodePath("EnemyRight"), NodePath("EnemyRear")]
+hero_walk_speed = 1.2
+enemy_walk_speed = 0.52
+
+[node name="EnemyLeft" parent="SubViewportContainer/SubViewport/PlayerRotator" instance=ExtResource("5")]
+transform = Transform3D(-0.769752, 0, -0.638343, 0, 1, 0, 0.638343, 0, -0.769752, 1.20, 0, -1.05)
+
+[node name="EnemyRight" parent="SubViewportContainer/SubViewport/PlayerRotator" instance=ExtResource("5")]
+transform = Transform3D(-0.559193, 0, -0.829038, 0, 1, 0, 0.829038, 0, -0.559193, 4.20, 0, -1.25)
+
+[node name="EnemyRear" parent="SubViewportContainer/SubViewport/PlayerRotator" instance=ExtResource("5")]
+transform = Transform3D(-0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, -0.984808, 3.20, 0, -2.05)
+scale = Vector3(0.86, 0.86, 0.86)
 
 [node name="Player" parent="SubViewportContainer/SubViewport/PlayerRotator" instance=ExtResource("3")]
+transform = Transform3D(0.951057, 0, 0.309017, 0, 1, 0, -0.309017, 0, 0.951057, 2.82, 0, 0.25)
 
 [node name="LeftPanel" type="ColorRect" parent="."]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_right = 420.0
+offset_right = 430.0
 grow_vertical = 2
-color = Color(0.08, 0.1, 0.14, 0.9)
+color = Color(0.035, 0.045, 0.055, 0.94)
+mouse_filter = 2
+
+[node name="AccentBar" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 6.0
+grow_vertical = 2
+color = Color(0.14, 0.72, 0.82, 1)
+mouse_filter = 2
 
 [node name="Container" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 9
 anchor_bottom = 1.0
-offset_left = 60.0
-offset_right = 360.0
+offset_left = 48.0
+offset_top = 54.0
+offset_right = 372.0
+offset_bottom = -48.0
 grow_vertical = 2
-alignment = 1
-theme_override_constants/separation = 30
+theme_override_constants/separation = 24
 
 [node name="Title" type="Label" parent="Container"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 48
-modulate = Color(1, 0.85, 0.50, 1)
-text = "WORLD 
-FARM"
+theme_override_font_sizes/font_size = 50
+modulate = Color(0.94, 0.95, 0.88, 1)
+text = "WORLD\nFARM"
 
 [node name="Subtitle" type="Label" parent="Container"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-modulate = Color(0.85, 0.85, 0.95, 0.85)
-text = "Capybara Combat"
+theme_override_font_sizes/font_size = 16
+modulate = Color(0.52, 0.84, 0.88, 1)
+text = "N.O.A. TACTICAL UNIT"
 
 [node name="Spacer" type="Control" parent="Container"]
-custom_minimum_size = Vector2(0, 40)
+custom_minimum_size = Vector2(0, 28)
 layout_mode = 2
 
 [node name="Buttons" type="VBoxContainer" parent="Container"]
 layout_mode = 2
-alignment = 1
-theme_override_constants/separation = 16
+theme_override_constants/separation = 14
 
 [node name="PlayButton" type="Button" parent="Container/Buttons"]
-custom_minimum_size = Vector2(0, 54)
+custom_minimum_size = Vector2(0, 56)
 layout_mode = 2
-text = "▶  JUGAR"
-theme_override_font_sizes/font_size = 24
+theme_override_font_sizes/font_size = 23
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+text = "JUGAR"
 alignment = 0
 
 [node name="OptionsButton" type="Button" parent="Container/Buttons"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-text = "⚙   OPCIONES"
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+text = "OPCIONES"
 alignment = 0
 
 [node name="QuitButton" type="Button" parent="Container/Buttons"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
-text = "✕  SALIR"
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+text = "SALIR"
 alignment = 0
 
-[node name="Hint" type="Label" parent="."]
-layout_mode = 1
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = 20.0
-offset_top = -40.0
-offset_right = 600.0
-offset_bottom = -10.0
-grow_vertical = 0
-theme_override_font_sizes/font_size = 12
-modulate = Color(0.75, 0.75, 0.85, 0.5)
-text = "WASD mover · Mouse mirar · Click disparar · Esc pausa"
-mouse_filter = 2
+[node name="Status" type="Label" parent="Container"]
+layout_mode = 2
+size_flags_vertical = 10
+theme_override_font_sizes/font_size = 13
+modulate = Color(0.74, 0.78, 0.78, 0.72)
+text = "SISTEMA LISTO"
 
 [node name="OptionsPanel" type="Control" parent="."]
 visible = false
@@ -157,7 +284,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.05, 0.07, 0.12, 0.92)
+color = Color(0.03, 0.04, 0.05, 0.90)
 
 [node name="Container" type="VBoxContainer" parent="OptionsPanel"]
 layout_mode = 1
@@ -166,10 +293,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -160.0
-offset_right = 240.0
-offset_bottom = 160.0
+offset_left = -260.0
+offset_top = -170.0
+offset_right = 260.0
+offset_bottom = 170.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 20
@@ -184,13 +311,13 @@ horizontal_alignment = 1
 layout_mode = 2
 
 [node name="SensLabel" type="Label" parent="OptionsPanel/Container/SensRow"]
-custom_minimum_size = Vector2(180, 0)
+custom_minimum_size = Vector2(190, 0)
 layout_mode = 2
-text = "Sensibilidad"
 theme_override_font_sizes/font_size = 18
+text = "Sensibilidad"
 
 [node name="SensSlider" type="HSlider" parent="OptionsPanel/Container/SensRow"]
-custom_minimum_size = Vector2(260, 0)
+custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 size_flags_vertical = 4
 min_value = 0.0005
@@ -202,13 +329,13 @@ value = 0.003
 layout_mode = 2
 
 [node name="VolLabel" type="Label" parent="OptionsPanel/Container/VolRow"]
-custom_minimum_size = Vector2(180, 0)
+custom_minimum_size = Vector2(190, 0)
 layout_mode = 2
-text = "Volumen master"
 theme_override_font_sizes/font_size = 18
+text = "Volumen master"
 
 [node name="VolSlider" type="HSlider" parent="OptionsPanel/Container/VolRow"]
-custom_minimum_size = Vector2(260, 0)
+custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 size_flags_vertical = 4
 max_value = 1.0
@@ -220,7 +347,10 @@ custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
 
 [node name="BackButton" type="Button" parent="OptionsPanel/Container"]
-custom_minimum_size = Vector2(0, 44)
+custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
-text = "← Volver"
 theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+text = "VOLVER"
