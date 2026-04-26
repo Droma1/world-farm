@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/WeaponData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"rifle_basic"
+display_name = "Rifle de Asalto"
+damage = 18.0
+headshot_multiplier = 2.0
+damage_type = 0
+max_range = 80.0
+fire_mode = 1
+rounds_per_minute = 600.0
+spread_degrees = 1.5
+mag_size = 30
+reserve_ammo = 90
+reload_time = 2.0
+recoil_kick = Vector2(0.5, 0.3)

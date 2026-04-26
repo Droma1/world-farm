@@ -11,8 +11,16 @@ config_version=5
 [application]
 
 config/name="worldFarm"
+run/main_scene="res://scenes/levels/TrainingMap.tscn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+
+[autoload]
+
+EventBus="*res://scripts/autoload/EventBus.gd"
+GameState="*res://scripts/autoload/GameState.gd"
+RNG="*res://scripts/autoload/RNG.gd"
+InputSetup="*res://scripts/autoload/InputSetup.gd"
 
 [physics]
 

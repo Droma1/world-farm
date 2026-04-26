@@ -1,0 +1,132 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/Player.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/components/HealthComponent.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/components/MovementComponent.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/components/WeaponComponent.gd" id="4"]
+[ext_resource type="Resource" path="res://resources/characters/player_default.tres" id="5"]
+[ext_resource type="Script" path="res://scripts/components/WeaponVFX.gd" id="6"]
+[ext_resource type="Script" path="res://scripts/components/HumanoidAnimator.gd" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/Rifle.tscn" id="8"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
+height = 1.8
+radius = 0.35
+
+[sub_resource type="StandardMaterial3D" id="BodyMat_1"]
+albedo_color = Color(0.22, 0.5, 0.85, 1)
+roughness = 0.6
+
+[sub_resource type="StandardMaterial3D" id="HeadMat_1"]
+albedo_color = Color(0.95, 0.78, 0.65, 1)
+roughness = 0.7
+
+[sub_resource type="BoxMesh" id="TorsoMesh_1"]
+size = Vector3(0.30, 0.55, 0.18)
+
+[sub_resource type="SphereMesh" id="HeadMesh_1"]
+radius = 0.13
+height = 0.26
+
+[sub_resource type="CapsuleMesh" id="ArmMesh_1"]
+height = 0.55
+radius = 0.05
+
+[sub_resource type="CapsuleMesh" id="LegMesh_1"]
+height = 0.75
+radius = 0.08
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1")
+data = ExtResource("5")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
+shape = SubResource("CapsuleShape3D_1")
+
+[node name="Visuals" type="Node3D" parent="."]
+
+[node name="Torso" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15, 0)
+mesh = SubResource("TorsoMesh_1")
+material_override = SubResource("BodyMat_1")
+
+[node name="Head" type="MeshInstance3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, 0)
+mesh = SubResource("HeadMesh_1")
+material_override = SubResource("HeadMat_1")
+
+[node name="ArmL" type="Node3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.20, 1.40, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Visuals/ArmL"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.275, 0)
+mesh = SubResource("ArmMesh_1")
+material_override = SubResource("BodyMat_1")
+
+[node name="ArmR" type="Node3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.20, 1.40, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Visuals/ArmR"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.275, 0)
+mesh = SubResource("ArmMesh_1")
+material_override = SubResource("BodyMat_1")
+
+[node name="LegL" type="Node3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.09, 0.85, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Visuals/LegL"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.375, 0)
+mesh = SubResource("LegMesh_1")
+material_override = SubResource("BodyMat_1")
+
+[node name="LegR" type="Node3D" parent="Visuals"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.09, 0.85, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="Visuals/LegR"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.375, 0)
+mesh = SubResource("LegMesh_1")
+material_override = SubResource("BodyMat_1")
+
+[node name="CameraPitch" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, 0)
+
+[node name="RecoilPivot" type="Node3D" parent="CameraPitch"]
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraPitch/RecoilPivot"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.4, 0.2, 0)
+spring_length = 3.5
+margin = 0.05
+
+[node name="Camera3D" type="Camera3D" parent="CameraPitch/RecoilPivot/SpringArm3D"]
+fov = 70.0
+
+[node name="WeaponMount" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.30, -0.45)
+
+[node name="Rifle" parent="WeaponMount" instance=ExtResource("8")]
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2")
+max_health = 100.0
+
+[node name="MovementComponent" type="Node" parent="."]
+script = ExtResource("3")
+
+[node name="WeaponComponent" type="Node3D" parent="."]
+script = ExtResource("4")
+
+[node name="HumanoidAnimator" type="Node" parent="."]
+script = ExtResource("7")
+visuals_path = NodePath("../Visuals")
+arm_l_path = NodePath("../Visuals/ArmL")
+arm_r_path = NodePath("../Visuals/ArmR")
+leg_l_path = NodePath("../Visuals/LegL")
+leg_r_path = NodePath("../Visuals/LegR")
+
+[node name="WeaponVFX" type="Node3D" parent="."]
+script = ExtResource("6")
+weapon_path = NodePath("../WeaponComponent")
+muzzle_path = NodePath("../WeaponMount/Rifle/Muzzle")
+muzzle_flash_path = NodePath("../WeaponMount/Rifle/Muzzle/MuzzleFlash")
+weapon_visual_path = NodePath("../WeaponMount/Rifle")

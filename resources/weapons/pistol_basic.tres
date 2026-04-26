@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/WeaponData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"pistol_basic"
+display_name = "Pistola"
+damage = 25.0
+headshot_multiplier = 2.0
+damage_type = 0
+max_range = 100.0
+fire_mode = 0
+rounds_per_minute = 250.0
+spread_degrees = 1.0
+mag_size = 12
+reserve_ammo = 60
+reload_time = 1.5
+recoil_kick = Vector2(0.4, 0.2)
