@@ -70,15 +70,22 @@ func _input(event: InputEvent) -> void:
 		var k := event as InputEventKey
 		var terminal := (GameState.mode == GameState.Mode.GAME_OVER
 				or GameState.mode == GameState.Mode.VICTORY)
+		# Marcamos el input como handled ANTES de cambiar de escena. Una vez
+		# que reload_current_scene/change_scene corren, el HUD puede estar
+		# desconectado del árbol y get_viewport() devolvería null.
+		var vp := get_viewport()
 		if terminal and k.keycode == KEY_R:
+			if vp:
+				vp.set_input_as_handled()
 			get_tree().reload_current_scene()
-			get_viewport().set_input_as_handled()
 		elif terminal and k.keycode == KEY_M:
+			if vp:
+				vp.set_input_as_handled()
 			get_tree().change_scene_to_file("res://scenes/ui/MainMenu.tscn")
-			get_viewport().set_input_as_handled()
 		elif k.keycode == KEY_ESCAPE and GameState.mode == GameState.Mode.PLAYING:
+			if vp:
+				vp.set_input_as_handled()
 			_toggle_pause()
-			get_viewport().set_input_as_handled()
 
 
 # ============================================================
@@ -194,7 +201,7 @@ func _on_streak_changed(streak: int, multiplier: float) -> void:
 
 func _on_pickup_collected(kind: StringName, amount: float) -> void:
 	var label := Label.new()
-	label.theme_override_font_sizes["font_size"] = 22
+	label.add_theme_font_size_override("font_size", 22)
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	match kind:

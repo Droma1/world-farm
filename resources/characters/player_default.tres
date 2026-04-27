@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="CharacterData" load_steps=4 format=3]
+[gd_resource type="Resource" script_class="CharacterData" load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://scripts/resources/CharacterData.gd" id="1"]
 [ext_resource type="Resource" path="res://resources/weapons/rifle_basic.tres" id="2"]
 [ext_resource type="Resource" path="res://resources/weapons/pistol_basic.tres" id="3"]
+[ext_resource type="Resource" path="res://resources/weapons/knife_basic.tres" id="4"]
 
 [resource]
 script = ExtResource("1")
@@ -12,5 +13,5 @@ move_speed = 5.0
 sprint_speed = 8.0
 jump_velocity = 6.0
 mouse_sensitivity = 0.003
-starting_weapons = Array[Resource]([ExtResource("2"), ExtResource("3")])
+starting_weapons = Array[Resource]([ExtResource("2"), ExtResource("3"), ExtResource("4")])
 starting_weapon = ExtResource("2")

@@ -8,6 +8,7 @@ enum DamageType { HITSCAN, PROJECTILE }
 
 @export var id: StringName = &"weapon"
 @export var display_name: String = "Weapon"
+@export var weapon_scene: PackedScene  ## Visual instanciado bajo WeaponMount al equipar
 
 @export_group("Damage")
 @export var damage: float = 25.0

@@ -1,4 +1,4 @@
-[gd_scene load_steps=51 format=3]
+[gd_scene load_steps=55 format=3]
 
 [ext_resource type="PackedScene" path="res://scenes/characters/player/Player.tscn" id="1"]
 [ext_resource type="PackedScene" path="res://scenes/world/TargetDummy.tscn" id="2"]
@@ -10,6 +10,8 @@
 [ext_resource type="Resource" path="res://resources/enemies/grunt.tres" id="EnemyGrunt"]
 [ext_resource type="Resource" path="res://resources/enemies/heavy.tres" id="EnemyHeavy"]
 [ext_resource type="Resource" path="res://resources/enemies/sniper.tres" id="EnemySniper"]
+[ext_resource type="PackedScene" path="res://assets/models/props/solar_outpost.glb" id="PropHouse"]
+[ext_resource type="PackedScene" path="res://assets/models/props/ruins_wall.glb" id="PropRuins"]
 
 [sub_resource type="Resource" id="Wave1"]
 script = ExtResource("7")
@@ -227,6 +229,19 @@ size = Vector3(4, 0.4, 4)
 [sub_resource type="BoxMesh" id="MeshSpawnPad"]
 size = Vector3(6, 0.05, 6)
 
+; --- Props GLB (caja de colisión approx, ajustar al tamaño real del modelo) ---
+[sub_resource type="BoxShape3D" id="ShapeHouse"]
+size = Vector3(6, 5, 6)
+
+[sub_resource type="BoxShape3D" id="ShapeBigHouse"]
+size = Vector3(10, 8, 10)
+
+[sub_resource type="BoxShape3D" id="ShapeRuins"]
+size = Vector3(4, 3, 1)
+
+[sub_resource type="BoxShape3D" id="ShapeMazeRuinsWide"]
+size = Vector3(2, 2.5, 5)
+
 
 ; ============================================================
 ;  ESCENA
@@ -435,6 +450,9 @@ shape = SubResource("ShapeMazeV")
 [node name="M" type="MeshInstance3D" parent="MazeWall1"]
 mesh = SubResource("MeshMazeV")
 material_override = SubResource("MazeMat")
+visible = false
+[node name="Model" parent="MazeWall1" instance=ExtResource("PropRuins")]
+transform = Transform3D(2, 0, 0, 0, 2.5, 0, 0, 0, 4, 0, 0, 0)
 
 [node name="MazeWall2" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -28, 1.2, 2)
@@ -451,6 +469,9 @@ shape = SubResource("ShapeMazeV")
 [node name="M" type="MeshInstance3D" parent="MazeWall3"]
 mesh = SubResource("MeshMazeV")
 material_override = SubResource("MazeMat")
+visible = false
+[node name="Model" parent="MazeWall3" instance=ExtResource("PropRuins")]
+transform = Transform3D(2, 0, 0, 0, 2.5, 0, 0, 0, 4, 0, 0, 0)
 
 [node name="MazeWall4" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 1.2, -8)
@@ -492,6 +513,43 @@ shape = SubResource("ShapeTunnelTop")
 [node name="M" type="MeshInstance3D" parent="TunnelTop"]
 mesh = SubResource("MeshTunnelTop")
 material_override = SubResource("TunnelMat")
+
+; --- Props GLB (Meshy) ---
+; SolarOutpost (casa, ~6m): noroeste del mapa.
+[node name="SolarOutpost" type="StaticBody3D" parent="."]
+transform = Transform3D(0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, 0.866025, -22, 0, -22)
+[node name="C" type="CollisionShape3D" parent="SolarOutpost"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.5, 0)
+shape = SubResource("ShapeHouse")
+[node name="Model" parent="SolarOutpost" instance=ExtResource("PropHouse")]
+transform = Transform3D(6, 0, 0, 0, 6, 0, 0, 0, 6, 0, 3, 0)
+
+; BigHouse (casa grande tamaño real, ~10m): landmark sureste del mapa.
+[node name="BigHouse" type="StaticBody3D" parent="."]
+transform = Transform3D(-0.866025, 0, 0.5, 0, 1, 0, -0.5, 0, -0.866025, 28, 0, -18)
+[node name="C" type="CollisionShape3D" parent="BigHouse"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4, 0)
+shape = SubResource("ShapeBigHouse")
+[node name="Model" parent="BigHouse" instance=ExtResource("PropHouse")]
+transform = Transform3D(10, 0, 0, 0, 10, 0, 0, 0, 10, 0, 5, 0)
+
+; RuinsWall (~3.5m): este del player.
+[node name="RuinsWall" type="StaticBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 14, 0, 2)
+[node name="C" type="CollisionShape3D" parent="RuinsWall"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("ShapeRuins")
+[node name="Model" parent="RuinsWall" instance=ExtResource("PropRuins")]
+transform = Transform3D(3.5, 0, 0, 0, 3.5, 0, 0, 0, 3.5, 0, 1.75, 0)
+
+; RuinsWall2 (~3.5m): variedad, girado 90° al oeste de los pilares.
+[node name="RuinsWall2" type="StaticBody3D" parent="."]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, -8, 0, -8)
+[node name="C" type="CollisionShape3D" parent="RuinsWall2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+shape = SubResource("ShapeRuins")
+[node name="Model" parent="RuinsWall2" instance=ExtResource("PropRuins")]
+transform = Transform3D(3.5, 0, 0, 0, 3.5, 0, 0, 0, 3.5, 0, 1.75, 0)
 
 ; --- Player ---
 [node name="Player" parent="." instance=ExtResource("1")]

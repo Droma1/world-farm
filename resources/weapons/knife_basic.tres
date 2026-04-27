@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/WeaponData.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/Knife.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"knife_basic"
+display_name = "Cuchillo Táctico"
+weapon_scene = ExtResource("2")
+damage = 40.0
+headshot_multiplier = 2.0
+damage_type = 0
+max_range = 1.8
+fire_mode = 0
+rounds_per_minute = 150.0
+spread_degrees = 0.0
+mag_size = 999
+reserve_ammo = 0
+reload_time = 0.0
+recoil_kick = Vector2(0.0, 0.0)

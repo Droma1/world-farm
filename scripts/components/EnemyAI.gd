@@ -19,6 +19,7 @@ var state: State = State.IDLE
 var body: CharacterBody3D
 var movement: MovementComponent
 var weapon: WeaponComponent
+var animator: HumanoidAnimator
 var aim_provider: Node3D
 var nav_agent: NavigationAgent3D
 
@@ -29,12 +30,23 @@ var _strafe_cooldown: float = 1.5
 var _strafe_remaining: float = 0.0
 var _strafe_dir: Vector3 = Vector3.ZERO
 
+# Squad: cada enemigo tiene un ángulo "preferido" alrededor del player para
+# que la escuadra se abra en abanico al perseguir, no se amontonen todos.
+# Se calcula una vez en _ready a partir del instance_id.
+var _squad_angle: float = 0.0
+
+# Acciones tácticas aleatorias mientras persigue/ataca: agacharse para cubrirse,
+# saltar para verse más dinámico. _tactical_timer cuenta hasta la próxima decisión.
+var _tactical_timer: float = 0.0
+var _crouch_release_at: float = -1.0  # tiempo (s desde inicio) al que liberar el crouch
+
 
 func _ready() -> void:
 	body = get_parent() as CharacterBody3D
 	assert(body != null, "EnemyAI: el padre debe ser CharacterBody3D")
 	movement = body.get_node_or_null("MovementComponent") as MovementComponent
 	weapon = body.get_node_or_null("WeaponComponent") as WeaponComponent
+	animator = body.get_node_or_null("HumanoidAnimator") as HumanoidAnimator
 	aim_provider = get_node_or_null(aim_provider_path) as Node3D
 	nav_agent = get_node_or_null(nav_agent_path) as NavigationAgent3D
 
@@ -46,11 +58,17 @@ func _ready() -> void:
 		weapon.setup(aim_provider, body)
 		if data and data.weapon:
 			weapon.equip(data.weapon)
+			# Notificar al animator para que use la pose correcta (rifle vs cuchillo)
+			if animator:
+				animator.set_weapon_data(data.weapon)
 
-	# Empezar agresivo: si hay un Player en la escena, ir directamente a
-	# CHASE en vez de quedarse en IDLE esperando entrar en detection_range.
-	# Esto es lo que el jugador espera en un mapa de entrenamiento: los
-	# enemigos vienen a por él desde el momento del spawn.
+	# Squad angle: ángulo único por enemigo para que la escuadra se abra en
+	# abanico alrededor del player en vez de amontonarse en un solo punto.
+	# Hash del instance_id da un valor determinístico distinto por enemigo.
+	_squad_angle = wrapf(float(get_instance_id()) * 0.6180339887, 0.0, TAU)
+	_tactical_timer = RNG.randf_range(2.0, 5.0)
+
+	# Empezar agresivo
 	if GameState.local_player != null:
 		state = State.CHASE
 
@@ -95,14 +113,18 @@ func _physics_process(delta: float) -> void:
 			elif distance < data.attack_range and _has_line_of_sight(player):
 				_change_state(State.ATTACK)
 			else:
-				var move_dir := _navigate_to(player.global_position, direct_dir)
+				# Squad target: posición offset alrededor del player según el
+				# ángulo único de este enemigo. Hace que la escuadra se abra
+				# en abanico en vez de pegarse todos al mismo punto.
+				var squad_target := _squad_position_around(player.global_position)
+				var move_dir := _navigate_to(squad_target, direct_dir)
 				if distance > data.stop_range:
 					movement.external_wish_dir = move_dir
 				else:
 					movement.external_wish_dir = Vector3.ZERO
-				# Mirar en la dirección de movimiento (no hacia el player directo,
-				# evita que vayan de costado al rodear obstáculos).
 				_face_direction(move_dir if move_dir.length_squared() > 0.01 else direct_dir, delta)
+				# Decisiones tácticas: salto ocasional al perseguir
+				_tick_tactical(delta, false)
 
 		State.ATTACK:
 			_face_direction(direct_dir, delta)
@@ -113,19 +135,20 @@ func _physics_process(delta: float) -> void:
 				movement.external_wish_dir = _strafe_dir
 			elif _strafe_cooldown <= 0.0:
 				var sign_x: float = 1.0 if RNG.randf() < 0.5 else -1.0
-				# basis.x es el "right" del enemigo en mundo
 				_strafe_dir = body.global_transform.basis.x * sign_x
 				_strafe_remaining = RNG.randf_range(0.4, 0.9)
 				_strafe_cooldown = RNG.randf_range(1.5, 3.0) + _strafe_remaining
 				movement.external_wish_dir = _strafe_dir
 			else:
 				movement.external_wish_dir = Vector3.ZERO
+			# Decisiones tácticas: agacharse para cubrirse mientras dispara
+			_tick_tactical(delta, true)
 			if data == null:
 				return
 			if distance > data.attack_range * 1.15 or not _has_line_of_sight(player):
 				_change_state(State.CHASE)
 			elif weapon:
-				weapon.handle_fire_input(true, false)
+				weapon.try_fire()
 
 
 func _navigate_to(target_world: Vector3, fallback_dir: Vector3) -> Vector3:
@@ -163,6 +186,40 @@ func _face_direction(dir: Vector3, delta: float) -> void:
 	var target_yaw := atan2(dir.x, dir.z) + PI
 	var turn: float = data.turn_speed if data else 6.0
 	body.rotation.y = lerp_angle(body.rotation.y, target_yaw, clampf(turn * delta, 0.0, 1.0))
+
+
+func _squad_position_around(player_pos: Vector3) -> Vector3:
+	## Punto en un círculo alrededor del player a un poco menos que attack_range,
+	## en el ángulo único de este enemigo. Crea distribución en abanico.
+	if data == null:
+		return player_pos
+	var radius: float = data.attack_range * 0.85
+	return player_pos + Vector3(cos(_squad_angle), 0.0, sin(_squad_angle)) * radius
+
+
+func _tick_tactical(delta: float, in_attack: bool) -> void:
+	## Decide ocasionalmente si agacharse (cuando ataca) o saltar (cuando persigue).
+	if movement == null:
+		return
+	# Liberar crouch si su tiempo ya pasó
+	if _crouch_release_at >= 0.0:
+		_crouch_release_at -= delta
+		if _crouch_release_at <= 0.0:
+			movement.external_crouch = false
+			_crouch_release_at = -1.0
+	# Decidir nueva acción cuando el timer expira
+	_tactical_timer -= delta
+	if _tactical_timer > 0.0:
+		return
+	_tactical_timer = RNG.randf_range(2.5, 5.5)
+	var roll := RNG.randf()
+	if in_attack and roll < 0.30 and _crouch_release_at < 0.0:
+		# Cubrirse: agacharse 1.5-3s mientras dispara desde abajo
+		movement.external_crouch = true
+		_crouch_release_at = RNG.randf_range(1.5, 3.0)
+	elif not in_attack and roll < 0.20 and body.is_on_floor():
+		# Saltar mientras persigue (look más dinámico)
+		movement.request_jump()
 
 
 func _has_line_of_sight(target: Node3D) -> bool:

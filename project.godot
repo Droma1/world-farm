@@ -25,6 +25,10 @@ InputSetup="*res://scripts/autoload/InputSetup.gd"
 AudioManager="*res://scripts/autoload/AudioManager.gd"
 DamageNumbers="*res://scripts/systems/vfx/DamageNumbers.gd"
 
+[filesystem]
+
+import/blender/enabled=false
+
 [physics]
 
 3d/physics_engine="Jolt Physics"

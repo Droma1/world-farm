@@ -15,6 +15,7 @@ signal reload_finished
 signal ammo_changed(in_mag: int, reserve: int)
 
 @export_flags_3d_physics var hit_mask: int = 0xFFFFFFFF
+@export var weapon_mount_path: NodePath  ## Marker3D bajo el cual se instancia el visual del arma
 
 var current: WeaponData
 var in_mag: int = 0
@@ -25,6 +26,12 @@ var _reloading: bool = false
 var _reload_timer: float = 0.0
 var _aim_provider: Node3D
 var _exclude_rids: Array[RID] = []
+var _weapon_mount: Node3D
+
+
+func _ready() -> void:
+	if weapon_mount_path:
+		_weapon_mount = get_node_or_null(weapon_mount_path) as Node3D
 
 
 func setup(aim_provider: Node3D, exclude_body: CollisionObject3D = null) -> void:
@@ -40,8 +47,24 @@ func equip(data: WeaponData) -> void:
 	reserve = data.reserve_ammo
 	_cooldown = 0.0
 	_reloading = false
+	# El visual se instancia ANTES de emitir weapon_equipped para que
+	# WeaponVFX (que escucha la signal y re-resuelve el muzzle) encuentre
+	# el visual recién puesto en el árbol.
+	_swap_visual(data)
 	weapon_equipped.emit(data)
 	ammo_changed.emit(in_mag, reserve)
+
+
+func _swap_visual(data: WeaponData) -> void:
+	if not is_instance_valid(_weapon_mount):
+		return
+	for child in _weapon_mount.get_children():
+		_weapon_mount.remove_child(child)
+		child.queue_free()
+	if data == null or data.weapon_scene == null:
+		return
+	var inst: Node = data.weapon_scene.instantiate()
+	_weapon_mount.add_child(inst)
 
 
 func _physics_process(delta: float) -> void:

@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-display_name = "Heavy"
+display_name = "Puma Blindado"
 max_health = 180.0
 move_speed = 1.8
 weapon = ExtResource("2")

@@ -1,86 +1,20 @@
-[gd_scene load_steps=30 format=3]
+[gd_scene format=3 uid="uid://7duue7aqjftr"]
 
-[ext_resource type="Script" path="res://scripts/entities/Enemy.gd" id="1"]
-[ext_resource type="Script" path="res://scripts/components/HealthComponent.gd" id="2"]
-[ext_resource type="Script" path="res://scripts/components/MovementComponent.gd" id="3"]
-[ext_resource type="Script" path="res://scripts/components/WeaponComponent.gd" id="4"]
-[ext_resource type="Script" path="res://scripts/components/EnemyAI.gd" id="5"]
+[ext_resource type="Script" uid="uid://bpfv67uu3les" path="res://scripts/entities/Enemy.gd" id="1"]
+[ext_resource type="Script" uid="uid://cvn62f4pltmar" path="res://scripts/components/HealthComponent.gd" id="2"]
+[ext_resource type="Script" uid="uid://un3wpodwdk54" path="res://scripts/components/MovementComponent.gd" id="3"]
+[ext_resource type="Script" uid="uid://ci4ocvbhrb7jt" path="res://scripts/components/WeaponComponent.gd" id="4"]
+[ext_resource type="Script" uid="uid://c8xrk7jgyofob" path="res://scripts/components/EnemyAI.gd" id="5"]
 [ext_resource type="Resource" path="res://resources/enemies/grunt.tres" id="6"]
-[ext_resource type="Script" path="res://scripts/components/WeaponVFX.gd" id="7"]
-[ext_resource type="Script" path="res://scripts/components/HumanoidAnimator.gd" id="8"]
-[ext_resource type="PackedScene" path="res://scenes/weapons/Rifle.tscn" id="9"]
+[ext_resource type="Script" uid="uid://brlai4gny3h5y" path="res://scripts/components/WeaponVFX.gd" id="7"]
+[ext_resource type="Script" uid="uid://b5du7fbejq8xa" path="res://scripts/components/HumanoidAnimator.gd" id="8"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/puma_rigged.glb" id="9"]
 [ext_resource type="PackedScene" path="res://scenes/world/HealthPickup.tscn" id="10"]
 [ext_resource type="PackedScene" path="res://scenes/world/AmmoPickup.tscn" id="11"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_E"]
-height = 1.85
 radius = 0.36
-
-[sub_resource type="StandardMaterial3D" id="EnemyArmorMat"]
-albedo_color = Color(0.70, 0.22, 0.14, 1)
-metallic = 0.58
-roughness = 0.38
-
-[sub_resource type="StandardMaterial3D" id="EnemyDarkMat"]
-albedo_color = Color(0.16, 0.12, 0.12, 1)
-metallic = 0.85
-roughness = 0.28
-
-[sub_resource type="StandardMaterial3D" id="EnemyAccentMat"]
-albedo_color = Color(0.95, 0.58, 0.24, 1)
-metallic = 0.7
-roughness = 0.3
-
-[sub_resource type="StandardMaterial3D" id="EnemyVisorMat"]
-albedo_color = Color(1.0, 0.12, 0.06, 1)
-emission_enabled = true
-emission = Color(1.0, 0.1, 0.04, 1)
-emission_energy_multiplier = 2.2
-metallic = 0.2
-roughness = 0.08
-
-[sub_resource type="BoxMesh" id="EnemyChestMesh"]
-size = Vector3(0.52, 0.52, 0.32)
-
-[sub_resource type="BoxMesh" id="EnemyCoreMesh"]
-size = Vector3(0.38, 0.24, 0.24)
-
-[sub_resource type="BoxMesh" id="EnemyPelvisMesh"]
-size = Vector3(0.38, 0.18, 0.26)
-
-[sub_resource type="SphereMesh" id="EnemyHeadShellMesh"]
-radius = 0.20
-height = 0.36
-
-[sub_resource type="BoxMesh" id="EnemySnoutMesh"]
-size = Vector3(0.24, 0.10, 0.16)
-
-[sub_resource type="BoxMesh" id="EnemyAntennaMesh"]
-size = Vector3(0.045, 0.20, 0.045)
-
-[sub_resource type="BoxMesh" id="EnemyVisorMesh"]
-size = Vector3(0.26, 0.07, 0.035)
-
-[sub_resource type="SphereMesh" id="EnemyShoulderMesh"]
-radius = 0.105
-height = 0.21
-
-[sub_resource type="CapsuleMesh" id="EnemyArmMesh"]
-height = 0.58
-radius = 0.065
-
-[sub_resource type="BoxMesh" id="EnemyForearmMesh"]
-size = Vector3(0.15, 0.25, 0.16)
-
-[sub_resource type="CapsuleMesh" id="EnemyLegMesh"]
-height = 0.72
-radius = 0.095
-
-[sub_resource type="BoxMesh" id="EnemyShinMesh"]
-size = Vector3(0.17, 0.30, 0.19)
-
-[sub_resource type="BoxMesh" id="EnemyFootMesh"]
-size = Vector3(0.18, 0.09, 0.27)
+height = 1.85
 
 [node name="Enemy" type="CharacterBody3D"]
 script = ExtResource("1")
@@ -94,130 +28,14 @@ shape = SubResource("CapsuleShape3D_E")
 
 [node name="Visuals" type="Node3D" parent="."]
 
-[node name="TorsoRig" type="Node3D" parent="Visuals"]
-
-[node name="Torso" type="MeshInstance3D" parent="Visuals/TorsoRig"]
-transform = Transform3D(1, 0, 0, 0, 1.05, 0, 0, 0, 1, 0, 1.08, 0)
-mesh = SubResource("EnemyChestMesh")
-material_override = SubResource("EnemyArmorMat")
-
-[node name="Core" type="MeshInstance3D" parent="Visuals/TorsoRig"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.80, -0.02)
-mesh = SubResource("EnemyCoreMesh")
-material_override = SubResource("EnemyDarkMat")
-
-[node name="Pelvis" type="MeshInstance3D" parent="Visuals/TorsoRig"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.55, 0.02)
-mesh = SubResource("EnemyPelvisMesh")
-material_override = SubResource("EnemyAccentMat")
-
-[node name="ShoulderL" type="MeshInstance3D" parent="Visuals/TorsoRig"]
-transform = Transform3D(1, 0, 0, 0, 0.92, 0, 0, 0, 1.08, -0.31, 1.15, -0.02)
-mesh = SubResource("EnemyShoulderMesh")
-material_override = SubResource("EnemyAccentMat")
-
-[node name="ShoulderR" type="MeshInstance3D" parent="Visuals/TorsoRig"]
-transform = Transform3D(1, 0, 0, 0, 0.92, 0, 0, 0, 1.08, 0.31, 1.15, -0.02)
-mesh = SubResource("EnemyShoulderMesh")
-material_override = SubResource("EnemyAccentMat")
-
-[node name="Head" type="Node3D" parent="Visuals/TorsoRig"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.52, -0.02)
-
-[node name="HelmetShell" type="MeshInstance3D" parent="Visuals/TorsoRig/Head"]
-transform = Transform3D(1.05, 0, 0, 0, 0.9, 0, 0, 0, 1.05, 0, 0, 0)
-mesh = SubResource("EnemyHeadShellMesh")
-material_override = SubResource("EnemyDarkMat")
-
-[node name="SnoutPlate" type="MeshInstance3D" parent="Visuals/TorsoRig/Head"]
-transform = Transform3D(1, 0, 0, 0, 0.9, 0, 0, 0, 1, 0, -0.02, -0.16)
-mesh = SubResource("EnemySnoutMesh")
-material_override = SubResource("EnemyArmorMat")
-
-[node name="Visor" type="MeshInstance3D" parent="Visuals/TorsoRig/Head"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.025, -0.19)
-mesh = SubResource("EnemyVisorMesh")
-material_override = SubResource("EnemyVisorMat")
-
-[node name="AntennaL" type="MeshInstance3D" parent="Visuals/TorsoRig/Head"]
-transform = Transform3D(0.95, -0.18, 0, 0.18, 0.95, 0, 0, 0, 1, -0.12, 0.18, 0.02)
-mesh = SubResource("EnemyAntennaMesh")
-material_override = SubResource("EnemyVisorMat")
-
-[node name="AntennaR" type="MeshInstance3D" parent="Visuals/TorsoRig/Head"]
-transform = Transform3D(0.95, 0.18, 0, -0.18, 0.95, 0, 0, 0, 1, 0.12, 0.18, 0.02)
-mesh = SubResource("EnemyAntennaMesh")
-material_override = SubResource("EnemyVisorMat")
-
-[node name="ArmL" type="Node3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.32, 1.28, -0.02)
-
-[node name="Mesh" type="MeshInstance3D" parent="Visuals/ArmL"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.30, 0)
-mesh = SubResource("EnemyArmMesh")
-material_override = SubResource("EnemyArmorMat")
-
-[node name="Forearm" type="MeshInstance3D" parent="Visuals/ArmL"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.58, 0.01)
-mesh = SubResource("EnemyForearmMesh")
-material_override = SubResource("EnemyDarkMat")
-
-[node name="ArmR" type="Node3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.32, 1.28, -0.02)
-
-[node name="Mesh" type="MeshInstance3D" parent="Visuals/ArmR"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.30, 0)
-mesh = SubResource("EnemyArmMesh")
-material_override = SubResource("EnemyArmorMat")
-
-[node name="Forearm" type="MeshInstance3D" parent="Visuals/ArmR"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.58, 0.01)
-mesh = SubResource("EnemyForearmMesh")
-material_override = SubResource("EnemyDarkMat")
-
-[node name="LegL" type="Node3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.15, 0.70, 0.02)
-
-[node name="Mesh" type="MeshInstance3D" parent="Visuals/LegL"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.36, 0)
-mesh = SubResource("EnemyLegMesh")
-material_override = SubResource("EnemyArmorMat")
-
-[node name="Shin" type="MeshInstance3D" parent="Visuals/LegL"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.74, 0.02)
-mesh = SubResource("EnemyShinMesh")
-material_override = SubResource("EnemyDarkMat")
-
-[node name="Foot" type="MeshInstance3D" parent="Visuals/LegL"]
-transform = Transform3D(1, 0, 0, 0, 0.85, 0, 0, 0, 1, 0, -0.91, -0.08)
-mesh = SubResource("EnemyFootMesh")
-material_override = SubResource("EnemyAccentMat")
-
-[node name="LegR" type="Node3D" parent="Visuals"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.15, 0.70, 0.02)
-
-[node name="Mesh" type="MeshInstance3D" parent="Visuals/LegR"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.36, 0)
-mesh = SubResource("EnemyLegMesh")
-material_override = SubResource("EnemyArmorMat")
-
-[node name="Shin" type="MeshInstance3D" parent="Visuals/LegR"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.74, 0.02)
-mesh = SubResource("EnemyShinMesh")
-material_override = SubResource("EnemyDarkMat")
-
-[node name="Foot" type="MeshInstance3D" parent="Visuals/LegR"]
-transform = Transform3D(1, 0, 0, 0, 0.85, 0, 0, 0, 1, 0, -0.91, -0.08)
-mesh = SubResource("EnemyFootMesh")
-material_override = SubResource("EnemyAccentMat")
+[node name="PumaModel" parent="Visuals" instance=ExtResource("9")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0.9, 0)
 
 [node name="EyeMarker" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.52, -0.14)
 
 [node name="WeaponMount" type="Marker3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.02, 1.25, -0.42)
-
-[node name="Rifle" parent="WeaponMount" instance=ExtResource("9")]
 
 [node name="HealthComponent" type="Node" parent="."]
 script = ExtResource("2")
@@ -229,14 +47,14 @@ read_input = false
 
 [node name="WeaponComponent" type="Node3D" parent="."]
 script = ExtResource("4")
+weapon_mount_path = NodePath("../WeaponMount")
 
 [node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
 path_desired_distance = 0.5
 target_desired_distance = 0.8
 path_max_distance = 60.0
-radius = 0.5
-height = 1.8
 avoidance_enabled = true
+height = 1.8
 
 [node name="EnemyAI" type="Node" parent="."]
 script = ExtResource("5")
@@ -247,21 +65,20 @@ nav_agent_path = NodePath("../NavigationAgent3D")
 [node name="HumanoidAnimator" type="Node" parent="."]
 script = ExtResource("8")
 visuals_path = NodePath("../Visuals")
-torso_path = NodePath("../Visuals/TorsoRig")
-head_path = NodePath("../Visuals/TorsoRig/Head")
-arm_l_path = NodePath("../Visuals/ArmL")
-arm_r_path = NodePath("../Visuals/ArmR")
-leg_l_path = NodePath("../Visuals/LegL")
-leg_r_path = NodePath("../Visuals/LegR")
-arm_hold_x = 1.12
-leg_walk_amp = 0.62
-arm_walk_amp = 0.08
+arm_hold_x = 0.5
+leg_walk_amp = 0.35
+arm_walk_amp = 0.05
 crouch_drop = 0.22
 walk_freq_factor = 1.45
+shin_walk_bend = 0.0
+shin_idle_bend = 0.0
+shin_air_bend = 0.0
+shin_crouch_bend = 0.0
+thigh_crouch_x = 0.7
+tail_walk_amp = 0.4
+tail_idle_amp = 0.12
 
 [node name="WeaponVFX" type="Node3D" parent="."]
 script = ExtResource("7")
 weapon_path = NodePath("../WeaponComponent")
-muzzle_path = NodePath("../WeaponMount/Rifle/Muzzle")
-muzzle_flash_path = NodePath("../WeaponMount/Rifle/Muzzle/MuzzleFlash")
-weapon_visual_path = NodePath("../WeaponMount/Rifle")
+weapon_mount_path = NodePath("../WeaponMount")

@@ -10,7 +10,6 @@ extends CharacterBody3D
 @onready var recoil_pivot: Node3D = $CameraPitch/RecoilPivot
 @onready var spring_arm: SpringArm3D = $CameraPitch/RecoilPivot/SpringArm3D
 @onready var camera: Camera3D = $CameraPitch/RecoilPivot/SpringArm3D/Camera3D
-@onready var weapon_mount: Marker3D = $WeaponMount
 @onready var health: HealthComponent = $HealthComponent
 @onready var movement: MovementComponent = $MovementComponent
 @onready var weapon: WeaponComponent = $WeaponComponent
@@ -115,6 +114,13 @@ func _handle_mouse_motion(m: InputEventMouseMotion) -> void:
 func _handle_mouse_button(mb: InputEventMouseButton) -> void:
 	if not mb.pressed:
 		return
+	# Ctrl + rueda → ciclar armas (wrap-around). Sin Ctrl, comportamiento normal.
+	if mb.ctrl_pressed and (
+		mb.button_index == MOUSE_BUTTON_WHEEL_UP
+		or mb.button_index == MOUSE_BUTTON_WHEEL_DOWN
+	):
+		_cycle_weapon(1 if mb.button_index == MOUSE_BUTTON_WHEEL_UP else -1)
+		return
 	match mb.button_index:
 		MOUSE_BUTTON_WHEEL_UP:
 			_zoom_target_fov = clampf(_zoom_target_fov - ZOOM_STEP, ZOOM_MIN_FOV, ZOOM_MAX_FOV)
@@ -139,10 +145,21 @@ func _handle_key(k: InputEventKey) -> void:
 		KEY_2:
 			if _weapons.size() >= 2:
 				_equip_weapon(1)
+		KEY_3:
+			if _weapons.size() >= 3:
+				_equip_weapon(2)
 		KEY_Q:
 			# Swap rápido al "última arma usada"
 			if _weapons.size() >= 2:
 				_equip_weapon((_active_weapon_idx + 1) % _weapons.size())
+
+
+func _cycle_weapon(direction: int) -> void:
+	var n: int = _weapons.size()
+	if n < 2:
+		return
+	var next_idx: int = ((_active_weapon_idx + direction) % n + n) % n
+	_equip_weapon(next_idx)
 
 
 func _equip_weapon(idx: int) -> void:
@@ -154,14 +171,19 @@ func _equip_weapon(idx: int) -> void:
 			"in_mag": weapon.in_mag,
 			"reserve": weapon.reserve,
 		}
-	# Equipar la nueva
+	# Equipar la nueva. WeaponComponent.equip() instancia el visual del arma
+	# bajo WeaponMount automáticamente, así que no hay que tocarlo aquí.
 	_active_weapon_idx = idx
-	weapon.equip(_weapons[idx])
+	var data: WeaponData = _weapons[idx]
+	weapon.equip(data)
+	# Notificar al animator para que cambie la pose base (rifle vs cuchillo)
+	if animator:
+		animator.set_weapon_data(data)
 	var state: Dictionary = _weapon_states[idx]
-	weapon.in_mag = state.get("in_mag", _weapons[idx].mag_size)
-	weapon.reserve = state.get("reserve", _weapons[idx].reserve_ammo)
+	weapon.in_mag = state.get("in_mag", data.mag_size)
+	weapon.reserve = state.get("reserve", data.reserve_ammo)
 	weapon.ammo_changed.emit(weapon.in_mag, weapon.reserve)
-	EventBus.weapon_swapped.emit(_weapons[idx], idx)
+	EventBus.weapon_swapped.emit(data, idx)
 
 
 func _process(delta: float) -> void:
@@ -207,12 +229,15 @@ func _on_step() -> void:
 	AudioManager.play_3d(&"footstep", global_position, -10.0, 0.10, 35.0)
 
 
-func _on_weapon_shot_fired(_data: WeaponData, _end_point: Vector3, _hit_data: Dictionary) -> void:
+func _on_weapon_shot_fired(data: WeaponData, _end_point: Vector3, _hit_data: Dictionary) -> void:
 	if weapon.current == null:
 		return
 	var kick: Vector2 = weapon.current.recoil_kick
 	_recoil_pitch += kick.y * recoil_pitch_factor
 	_recoil_yaw += RNG.randf_range(-1.0, 1.0) * kick.x * recoil_yaw_factor
+	# Slash animation cuando golpea con cuchillo (max_range corto = melee)
+	if animator and data and data.max_range < 5.0:
+		animator.trigger_attack(0.32)
 
 
 func _on_player_damaged(amount: float, _source: Node) -> void:
@@ -230,7 +255,20 @@ func _on_died() -> void:
 	# el efecto dramático.
 	set_physics_process(false)
 	set_process_input(false)
-	movement.external_wish_dir = Vector3.ZERO
+	# El MovementComponent corre en su propio _physics_process leyendo
+	# Input.get_action_strength directamente — apagarlo para que el cadáver
+	# no se mueva con WASD.
+	if movement:
+		movement.set_physics_process(false)
+		movement.read_input = false
+		movement.external_wish_dir = Vector3.ZERO
+		movement.is_sprinting = false
+		movement.is_crouching = false
+		velocity = Vector3.ZERO
+	# Detener animación procedural — el cadáver queda en su última pose +
+	# la rotación del tween. Sin esto, los miembros siguen oscilando.
+	if animator:
+		animator.set_dead(true)
 
 	# Animación: el capibara cae hacia atrás + cámara al suelo
 	var tween := create_tween().set_parallel(true)

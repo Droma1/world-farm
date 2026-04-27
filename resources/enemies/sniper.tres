@@ -5,7 +5,7 @@
 
 [resource]
 script = ExtResource("1")
-display_name = "Sniper"
+display_name = "Puma Francotirador"
 max_health = 35.0
 move_speed = 2.5
 weapon = ExtResource("2")

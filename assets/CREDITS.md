@@ -3,6 +3,25 @@
 All third-party assets are **CC0 1.0 (public domain)** unless otherwise noted —
 no attribution required, but credited here as good practice.
 
+## Modelos 3D generados con IA — `assets/models/`
+
+Generados con **Meshy.ai** a partir de los prompts del documento
+`docs/capibara_operator_concept.md` (estilo cartoon estilizado, Halo-inspired).
+
+| Archivo | Tipo | Notas |
+|---------|------|-------|
+| `models/characters/capibara_player_rigged.glb` | Personaje | **Capibara con esqueleto humanoid (20 bones)**. Activo en `Player.tscn`. Bones: `pelvis, spine_01/02, neck, head, shoulder/upper_arm/forearm/hand_L/R, thigh/shin/foot_L/R, neutral_bone`. Sin animaciones bakeadas — procedural vía `HumanoidAnimator`. |
+| `models/characters/puma_rigged.glb` | Enemigo | **Puma con rig humanoid + cola articulada (23 bones)**. Misma estructura que el capibara más `tail_01/02/03`. Animación de cola con whip-style sway (phase offset por segmento). Activo en `Enemy.tscn`. |
+| `models/pickups/mecha.glb` | Pickup / power-up | Mecha invocable. Reservado para feature futura: paquete aleatorio que aparece en combate y permite al jugador pilotar el mecha temporalmente. No instanciado todavía. |
+| `models/weapons/rifle_halo.glb` | Arma | Rifle de asalto bullpup tipo MA5C-K. Se usa en `scenes/weapons/RifleHalo.tscn`. |
+| `models/weapons/knife.glb` | Arma | Cuchillo táctico K-Bayonet. Se usa en `scenes/weapons/Knife.tscn`. |
+| `models/props/solar_outpost.glb` | Prop | Casa "Last Solar Outpost" — outpost habitable post-apocalíptico. Instanciada en `TrainingMap.tscn`. |
+| `models/props/ruins_wall.glb` | Prop | Muro "Mossy Ruins" — fragmento de muro cubierto de musgo. Reutilizable como cobertura. |
+
+**Licencia Meshy**: free tier permite uso comercial de los assets generados
+(verificar términos vigentes en meshy.ai antes de publicar).
+**Pistola** (`pistol_halo.glb`): pendiente de generar.
+
 ## Texturas PBR realistas — `assets/textures/pbr/`
 
 Source: **Poly Haven** (CC0 1.0)
