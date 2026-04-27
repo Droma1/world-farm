@@ -1,5 +1,5 @@
 extends Control
-## Pantalla principal. Carga TrainingMap al pulsar Jugar. Opciones reusan
+## Pantalla principal. Carga el escenario compacto al pulsar Jugar. Opciones reusan
 ## Settings autoload (mismo flow que el pause menu).
 
 @export var play_scene: PackedScene
