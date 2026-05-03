@@ -17,6 +17,22 @@ extends Node3D
 @export var kick_pitch: float = 0.06         # rad — el cañón sube un poco
 @export var kick_recover_speed: float = 18.0
 
+@export_group("Reload weapon motion")
+## Animación del arma durante recarga (3 fases: arriba → lateral → frente).
+@export var reload_lift_up: float = 0.18         ## m arriba en la fase 1
+@export var reload_lift_pitch: float = 0.55      ## rad — cañón apuntando arriba
+@export var reload_side_offset: float = 0.12     ## m al lateral (+X) en la fase 2
+@export var reload_side_yaw: float = 0.65        ## rad — cañón apuntando al lateral
+@export var reload_side_roll: float = 0.30       ## rad — twist del arma al lateral
+
+@export_group("Melee swing motion")
+## Animación del cuchillo / arma melee al cortar (windup → strike).
+@export var melee_windup_lift: float = 0.18      ## m arriba en el windup
+@export var melee_windup_pitch: float = -0.7     ## rad — punta hacia arriba
+@export var melee_strike_thrust: float = 0.18    ## m hacia adelante en el strike
+@export var melee_strike_pitch: float = 0.9      ## rad — punta hacia abajo / al frente
+@export var melee_strike_yaw: float = 0.35       ## rad — cruce lateral del corte
+
 @export_group("Impact decal")
 @export var decal_size: float = 0.10
 @export var decal_lifetime: float = 8.0
@@ -38,6 +54,16 @@ var _kick_z: float = 0.0          # offset hacia atrás
 var _kick_pitch_x: float = 0.0    # cañón hacia arriba
 var _flash_timer: float = 0.0
 
+# Reload anim: progreso 0..1, -1 = no reloading
+var _reload_t: float = 0.0
+var _reload_dur: float = 0.0
+var _reloading: bool = false
+
+# Melee swing anim
+var _swing_t: float = 0.0
+var _swing_dur: float = 0.0
+var _swinging: bool = false
+
 
 func _ready() -> void:
 	if weapon_path:
@@ -47,6 +73,8 @@ func _ready() -> void:
 	if _weapon:
 		_weapon.weapon_equipped.connect(_on_weapon_equipped)
 		_weapon.shot_fired.connect(_on_shot_fired)
+		_weapon.reload_started.connect(_on_reload_started)
+		_weapon.reload_finished.connect(_on_reload_finished)
 
 
 func _process(delta: float) -> void:
@@ -55,12 +83,55 @@ func _process(delta: float) -> void:
 		if _flash_timer <= 0.0 and is_instance_valid(_muzzle_flash):
 			_muzzle_flash.visible = false
 
+	# Avance de timers de pose
+	if _reloading:
+		_reload_t += delta
+		if _reload_t >= _reload_dur:
+			_reloading = false
+	if _swinging:
+		_swing_t += delta
+		if _swing_t >= _swing_dur:
+			_swinging = false
+
 	# Recover weapon kick
 	if is_instance_valid(_weapon_visual):
 		_kick_z = lerpf(_kick_z, 0.0, delta * kick_recover_speed)
 		_kick_pitch_x = lerpf(_kick_pitch_x, 0.0, delta * kick_recover_speed)
-		_weapon_visual.position = _weapon_visual_rest_pos + Vector3(0.0, 0.0, _kick_z)
-		_weapon_visual.rotation = _weapon_visual_rest_rot + Vector3(_kick_pitch_x, 0.0, 0.0)
+
+		var pos_offset := Vector3(0.0, 0.0, _kick_z)
+		var rot_offset := Vector3(_kick_pitch_x, 0.0, 0.0)
+
+		# Reload pose: 3 fases (lift → side → return)
+		# Convención: el cañón apunta a -Z (forward). Rotar +X gira la punta
+		# hacia ABAJO (porque +X usa right-hand rule: +Z → -Y); rotar -X la
+		# gira hacia ARRIBA. Por eso el lift usa rotación NEGATIVA en X.
+		if _reloading and _reload_dur > 0.0:
+			var p: float = clamp(_reload_t / _reload_dur, 0.0, 1.0)
+			var lift: float = smoothstep(0.0, 0.35, p) - smoothstep(0.65, 1.0, p)
+			var side: float = smoothstep(0.30, 0.55, p) - smoothstep(0.70, 1.0, p)
+			pos_offset += Vector3(side * reload_side_offset, lift * reload_lift_up, 0.0)
+			rot_offset += Vector3(-lift * reload_lift_pitch, side * reload_side_yaw, side * reload_side_roll)
+
+		# Melee swing pose: 2 fases (windup → strike). La punta del arma sube
+		# en el windup (rotación -X) y baja al frente en el strike (rotación +X).
+		if _swinging and _swing_dur > 0.0:
+			var s: float = clamp(_swing_t / _swing_dur, 0.0, 1.0)
+			var windup: float = smoothstep(0.0, 0.30, s) - smoothstep(0.30, 0.55, s)
+			var strike: float = smoothstep(0.30, 0.55, s) - smoothstep(0.55, 1.0, s)
+			pos_offset += Vector3(
+				strike * 0.05,
+				windup * melee_windup_lift - strike * 0.10,
+				-strike * melee_strike_thrust
+			)
+			# windup_pitch < 0 (eleva la punta), strike_pitch > 0 (baja la punta)
+			rot_offset += Vector3(
+				windup * melee_windup_pitch + strike * melee_strike_pitch,
+				strike * melee_strike_yaw,
+				0.0
+			)
+
+		_weapon_visual.position = _weapon_visual_rest_pos + pos_offset
+		_weapon_visual.rotation = _weapon_visual_rest_rot + rot_offset
 
 
 func _on_weapon_equipped(_data: WeaponData) -> void:
@@ -72,6 +143,8 @@ func _on_weapon_equipped(_data: WeaponData) -> void:
 	_weapon_visual = null
 	_kick_z = 0.0
 	_kick_pitch_x = 0.0
+	_reloading = false
+	_swinging = false
 	if not is_instance_valid(_weapon_mount):
 		return
 	for child in _weapon_mount.get_children():
@@ -96,7 +169,16 @@ func _on_shot_fired(data: WeaponData, end_point: Vector3, hit_data: Dictionary) 
 	# Cuchillo / melee: SIN muzzle flash, SIN tracer. Solo slash effect en hit.
 	var is_melee := data != null and data.max_range < 5.0
 
-	if not is_melee:
+	if is_melee:
+		# Lanzar la animación de swing del arma (windup → strike). Duración
+		# alineada con el cooldown del arma para que match con el siguiente input.
+		var swing_dur: float = 0.32
+		if data:
+			swing_dur = clampf(data.seconds_per_shot() * 0.85, 0.18, 0.55)
+		_swing_t = 0.0
+		_swing_dur = swing_dur
+		_swinging = true
+	else:
 		if is_instance_valid(_muzzle_flash):
 			_muzzle_flash.visible = true
 			_flash_timer = muzzle_flash_duration
@@ -113,11 +195,27 @@ func _on_shot_fired(data: WeaponData, end_point: Vector3, hit_data: Dictionary) 
 	var hit_character := collider is CharacterBody3D
 
 	if is_melee:
-		# Slash en el punto de hit (arco blanco brillante)
+		# Slash en el punto de hit (arco blanco brillante). Sin sparks naranjas
+		# ni decal de bala — esto es un corte, no un disparo.
 		_spawn_slash(hit_pos, hit_normal)
 	elif not hit_character:
 		_spawn_decal(hit_pos, hit_normal)
 		_spawn_sparks(hit_pos, hit_normal)
+
+
+func _on_reload_started() -> void:
+	if _weapon == null or _weapon.current == null:
+		return
+	# Melee no recarga.
+	if _weapon.current.max_range < 5.0:
+		return
+	_reload_t = 0.0
+	_reload_dur = max(0.05, _weapon.current.reload_time)
+	_reloading = true
+
+
+func _on_reload_finished() -> void:
+	_reloading = false
 
 
 # --- Slash effect (melee) ---

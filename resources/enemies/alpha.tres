@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/EnemyData.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/weapons/rifle_basic.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Puma Alpha"
+max_health = 280.0
+move_speed = 3.0
+weapon = ExtResource("2")
+score_value = 600
+body_tint = Color(1.0, 0.78, 0.20, 1)
+drop_chance = 0.95
+detection_range = 90.0
+attack_range = 22.0
+stop_range = 10.0
+lose_target_range = 120.0
+turn_speed = 5.0

@@ -1,0 +1,74 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/Enemy.gd" id="1"]
+[ext_resource type="Script" path="res://scripts/components/HealthComponent.gd" id="2"]
+[ext_resource type="Script" path="res://scripts/components/MovementComponent.gd" id="3"]
+[ext_resource type="Script" path="res://scripts/components/WeaponComponent.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/components/EnemyAI.gd" id="5"]
+[ext_resource type="Resource" path="res://resources/enemies/blocky_drone.tres" id="6"]
+[ext_resource type="Script" path="res://scripts/components/WeaponVFX.gd" id="7"]
+[ext_resource type="Script" path="res://scripts/components/BlockyAnimator.gd" id="8"]
+[ext_resource type="PackedScene" path="res://assets/models/characters/blocky/character-d.glb" id="9"]
+[ext_resource type="PackedScene" path="res://scenes/world/HealthPickup.tscn" id="10"]
+[ext_resource type="PackedScene" path="res://scenes/world/AmmoPickup.tscn" id="11"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_B"]
+radius = 0.32
+height = 1.7
+
+[node name="Enemy" type="CharacterBody3D"]
+script = ExtResource("1")
+data = ExtResource("6")
+health_pickup_scene = ExtResource("10")
+ammo_pickup_scene = ExtResource("11")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+shape = SubResource("CapsuleShape3D_B")
+
+[node name="Visuals" type="Node3D" parent="."]
+
+; El modelo blocky mide ~2.0 m a escala 1 (origin a los pies). Lo rotamos
+; 180° en Y para que mire al frente del player (igual que el puma).
+[node name="BlockyModel" parent="Visuals" instance=ExtResource("9")]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, 0, 0, 0)
+
+[node name="EyeMarker" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, -0.10)
+
+[node name="WeaponMount" type="Marker3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.18, 1.10, -0.30)
+
+[node name="HealthComponent" type="Node" parent="."]
+script = ExtResource("2")
+max_health = 50.0
+
+[node name="MovementComponent" type="Node" parent="."]
+script = ExtResource("3")
+read_input = false
+
+[node name="WeaponComponent" type="Node3D" parent="."]
+script = ExtResource("4")
+weapon_mount_path = NodePath("../WeaponMount")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="."]
+path_desired_distance = 0.5
+target_desired_distance = 0.8
+path_max_distance = 60.0
+avoidance_enabled = true
+height = 1.7
+
+[node name="EnemyAI" type="Node" parent="."]
+script = ExtResource("5")
+data = ExtResource("6")
+aim_provider_path = NodePath("../EyeMarker")
+nav_agent_path = NodePath("../NavigationAgent3D")
+
+[node name="BlockyAnimator" type="Node" parent="."]
+script = ExtResource("8")
+visuals_path = NodePath("../Visuals")
+
+[node name="WeaponVFX" type="Node3D" parent="."]
+script = ExtResource("7")
+weapon_path = NodePath("../WeaponComponent")
+weapon_mount_path = NodePath("../WeaponMount")

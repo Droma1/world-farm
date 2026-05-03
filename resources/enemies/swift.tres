@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/EnemyData.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/weapons/knife_enemy.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Puma Veloz"
+max_health = 40.0
+move_speed = 7.0
+weapon = ExtResource("2")
+score_value = 150
+body_tint = Color(0.40, 0.85, 1.0, 1)
+drop_chance = 0.40
+detection_range = 70.0
+attack_range = 2.5
+stop_range = 1.2
+lose_target_range = 90.0
+turn_speed = 11.0

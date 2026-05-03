@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/EnemyData.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/weapons/rifle_enemy.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Drone Helix"
+max_health = 70.0
+move_speed = 4.0
+weapon = ExtResource("2")
+score_value = 180
+body_tint = Color(0.65, 0.78, 1.0, 1)
+drop_chance = 0.45
+detection_range = 60.0
+attack_range = 16.0
+stop_range = 8.0
+lose_target_range = 80.0
+turn_speed = 6.5

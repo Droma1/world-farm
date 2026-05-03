@@ -94,13 +94,17 @@ func handle_fire_input(pressed: bool, just_pressed: bool) -> void:
 func try_fire() -> bool:
 	if current == null or _reloading or _cooldown > 0.0 or _aim_provider == null:
 		return false
-	if in_mag <= 0:
+	# Melee no consume munición ni se queda sin balas: el cuchillo es un arma
+	# de cuerpo a cuerpo, no de proyectiles.
+	var is_melee: bool = current.max_range < 5.0
+	if not is_melee and in_mag <= 0:
 		if reserve > 0:
 			try_reload()
 		return false
 
 	_cooldown = current.seconds_per_shot()
-	in_mag -= 1
+	if not is_melee:
+		in_mag -= 1
 
 	var origin: Vector3 = _aim_provider.global_position
 	var basis := _aim_provider.global_transform.basis
@@ -122,7 +126,10 @@ func try_fire() -> bool:
 	# TODO: PROJECTILE → spawn current.projectile_scene + dejar que viaje físico.
 
 	shot_fired.emit(current, end_point, hit_data)
-	EventBus.weapon_fired.emit(self, origin, dir)
+	# weapon_fired dispara el SFX de disparo. Para melee no queremos sonido
+	# de balazo: el slash visual + audio de impacto (si hay) ya es suficiente.
+	if not is_melee:
+		EventBus.weapon_fired.emit(self, origin, dir)
 	ammo_changed.emit(in_mag, reserve)
 	return true
 

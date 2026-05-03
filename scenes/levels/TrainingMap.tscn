@@ -10,6 +10,11 @@
 [ext_resource type="Resource" path="res://resources/enemies/grunt.tres" id="EnemyGrunt"]
 [ext_resource type="Resource" path="res://resources/enemies/heavy.tres" id="EnemyHeavy"]
 [ext_resource type="Resource" path="res://resources/enemies/sniper.tres" id="EnemySniper"]
+[ext_resource type="Resource" path="res://resources/enemies/swift.tres" id="EnemySwift"]
+[ext_resource type="Resource" path="res://resources/enemies/acid.tres" id="EnemyAcid"]
+[ext_resource type="Resource" path="res://resources/enemies/alpha.tres" id="EnemyAlpha"]
+[ext_resource type="Resource" path="res://resources/enemies/blocky_drone.tres" id="EnemyBlocky"]
+[ext_resource type="PackedScene" path="res://scenes/characters/enemies/EnemyBlocky.tscn" id="SceneBlocky"]
 [ext_resource type="PackedScene" path="res://assets/models/props/solar_outpost.glb" id="PropHouse"]
 [ext_resource type="PackedScene" path="res://assets/models/props/ruins_wall.glb" id="PropRuins"]
 
@@ -23,27 +28,37 @@ spawn_interval = 1.5
 
 [sub_resource type="Resource" id="Wave2"]
 script = ExtResource("7")
-name = "Oleada 2 — Refuerzos"
+name = "Oleada 2 — Refuerzos veloces"
 enemy_scene = ExtResource("4")
-enemy_data_list = Array[Resource]([ExtResource("EnemyGrunt"), ExtResource("EnemyHeavy")])
-enemy_counts = Array[int]([4, 1])
+enemy_data_list = Array[Resource]([ExtResource("EnemyGrunt"), ExtResource("EnemySwift"), ExtResource("EnemyHeavy")])
+enemy_counts = Array[int]([3, 2, 1])
 spawn_interval = 1.2
 
 [sub_resource type="Resource" id="Wave3"]
 script = ExtResource("7")
-name = "Oleada 3 — Francotiradores"
+name = "Oleada 3 — Tóxicos y francotiradores"
 enemy_scene = ExtResource("4")
-enemy_data_list = Array[Resource]([ExtResource("EnemySniper"), ExtResource("EnemyGrunt")])
-enemy_counts = Array[int]([2, 2])
-spawn_interval = 1.4
+enemy_data_list = Array[Resource]([ExtResource("EnemySniper"), ExtResource("EnemyAcid"), ExtResource("EnemySwift")])
+enemy_counts = Array[int]([2, 2, 2])
+spawn_interval = 1.3
 
 [sub_resource type="Resource" id="Wave4"]
 script = ExtResource("7")
-name = "Oleada 4 — Ofensiva final"
+name = "Oleada 4 — Alpha desciende"
 enemy_scene = ExtResource("4")
-enemy_data_list = Array[Resource]([ExtResource("EnemyGrunt"), ExtResource("EnemyHeavy"), ExtResource("EnemySniper")])
-enemy_counts = Array[int]([5, 2, 2])
+enemy_data_list = Array[Resource]([ExtResource("EnemySwift"), ExtResource("EnemyHeavy"), ExtResource("EnemyAcid"), ExtResource("EnemyAlpha")])
+enemy_counts = Array[int]([3, 2, 2, 1])
 spawn_interval = 0.9
+
+; Oleada 5 — Drones del Consorcio Helix (encaja con Acto 2 narrativo).
+; Usa otra enemy_scene (EnemyBlocky.tscn) con su propio rig + animator.
+[sub_resource type="Resource" id="Wave5"]
+script = ExtResource("7")
+name = "Oleada 5 — Drones Helix"
+enemy_scene = ExtResource("SceneBlocky")
+enemy_data_list = Array[Resource]([ExtResource("EnemyBlocky")])
+enemy_counts = Array[int]([6])
+spawn_interval = 1.0
 
 [sub_resource type="NavigationMesh" id="NavMesh"]
 geometry_parsed_geometry_type = 1
@@ -576,7 +591,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -10)
 ; --- WaveSystem ---
 [node name="WaveSystem" type="Node" parent="."]
 script = ExtResource("6")
-waves = Array[Resource]([SubResource("Wave1"), SubResource("Wave2"), SubResource("Wave3"), SubResource("Wave4")])
+waves = Array[Resource]([SubResource("Wave1"), SubResource("Wave2"), SubResource("Wave3"), SubResource("Wave4"), SubResource("Wave5")])
 spawn_points_path = NodePath("../SpawnPoints")
 initial_delay = 4.0
 time_between_waves = 5.0

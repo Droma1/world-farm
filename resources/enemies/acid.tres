@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/EnemyData.gd" id="1"]
+[ext_resource type="Resource" path="res://resources/weapons/rifle_enemy.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Puma Tóxico"
+max_health = 90.0
+move_speed = 3.5
+weapon = ExtResource("2")
+score_value = 220
+body_tint = Color(0.55, 1.0, 0.40, 1)
+drop_chance = 0.50
+detection_range = 70.0
+attack_range = 18.0
+stop_range = 9.0
+lose_target_range = 90.0
+turn_speed = 6.0

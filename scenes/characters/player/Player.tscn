@@ -58,9 +58,10 @@ weapon_mount_path = NodePath("../WeaponMount")
 [node name="HumanoidAnimator" type="Node" parent="."]
 script = ExtResource("7")
 visuals_path = NodePath("../Visuals")
+swap_pitch_roll_axes = true
 arm_hold_x = 0.5
-leg_walk_amp = 0.35
-arm_walk_amp = 0.05
+leg_walk_amp = 0.45
+arm_walk_amp = 0.07
 crouch_drop = 0.26
 walk_freq_factor = 1.55
 smooth_speed = 11.0

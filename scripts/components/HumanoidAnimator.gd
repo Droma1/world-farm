@@ -18,6 +18,12 @@ extends Node
 @export var visuals_path: NodePath
 @export var skeleton_path: NodePath  ## Si vacío, busca Skeleton3D recursivamente bajo Visuals
 
+## Rigs distintos tienen distintos bone roll: en algunos (capibara/puma) el eje
+## "pitch" (forward/back swing) cae sobre el bone-local Z en vez de X. Cuando
+## true, intercambiamos los argumentos X y Z al aplicar rotaciones de hueso,
+## de forma que las piernas/brazos balanceen forward/back en vez de side-to-side.
+@export var swap_pitch_roll_axes: bool = false
+
 # --- Tuning base ---
 @export var arm_hold_x: float = 1.0
 @export var leg_walk_amp: float = 0.55
@@ -44,11 +50,16 @@ extends Node
 @export var shin_crouch_bend: float = 1.55
 
 @export_group("Reload animation")
+## Recarga en 3 fases:
+##   Fase 1 (lift):   eleva el arma hacia arriba
+##   Fase 2 (side):   inclina el arma al lateral, brazo izquierdo saca cargador
+##   Fase 3 (return): vuelve a la posición de listo apuntando al frente
 @export var reload_arm_l_pull: float = 0.55
 @export var reload_arm_l_yaw: float = 0.45
 @export var reload_forearm_l_bend: float = 1.30
 @export var reload_hand_l_twist: float = 0.55
-@export var reload_arm_r_lift: float = 0.20
+@export var reload_arm_r_lift: float = 0.85   ## Cuánto sube el brazo derecho en la fase 1
+@export var reload_arm_r_side: float = 0.55   ## Cuánto se inclina al lateral en la fase 2
 @export var reload_forearm_r_bend: float = 0.30
 @export var forearm_l_rest_x: float = 0.30
 @export var forearm_r_rest_x: float = 0.25
@@ -61,8 +72,22 @@ extends Node
 @export var knife_forearm_r_bend: float = 0.4
 @export var knife_forearm_l_bend: float = 0.6
 
+@export_group("Rifle two-hand pose")
+## Pose a dos manos del rifle: el brazo izquierdo cruza al frente para
+## sujetar el guardamano, el derecho mantiene el grip cerca del pecho.
+## Estos valores se SUMAN a la pose base (arm_hold_x).
+@export var rifle_arm_l_extra_pitch: float = 0.30  ## Extiende el brazo izq más al frente
+@export var rifle_arm_l_yaw: float = -0.20     ## Cruza el brazo izq hacia la derecha (twist sutil)
+@export var rifle_arm_r_yaw: float = 0.10      ## Inclinación leve del derecho
+@export var rifle_arm_l_z_offset: float = 0.10 ## Roll del brazo izq para llevarlo a la línea del rifle
+@export var rifle_forearm_l_bend: float = 0.75 ## Codo izq doblado para llegar al guardamano
+@export var rifle_forearm_r_bend: float = 0.55 ## Codo derecho doblado al pecho
+
 @export_group("Attack animation (slash)")
-@export var attack_arm_r_swing: float = 1.2
+## El slash tiene 2 fases: windup (sube el brazo) y strike (baja en arco).
+@export var attack_arm_r_swing: float = 1.2     ## amplitud del strike (brazo bajando)
+@export var attack_arm_r_windup: float = 0.7    ## cuánto sube el brazo en el windup
+@export var attack_arm_r_yaw: float = 0.55      ## abre/cruza el brazo en el strike
 @export var attack_forearm_r_extend: float = -0.5
 
 @export_group("Tail (puma)")
@@ -216,6 +241,21 @@ func trigger_attack(duration: float = 0.35) -> void:
 	_attack_dur = max(0.05, duration)
 
 
+## 0..1 si está recargando, -1 si no. Útil para que WeaponVFX sincronice el
+## movimiento del arma visible con la pose del brazo (3 fases).
+func get_reload_progress() -> float:
+	if not _reloading:
+		return -1.0
+	return clamp(_reload_t / _reload_dur, 0.0, 1.0)
+
+
+## 0..1 si está atacando, -1 si no.
+func get_attack_progress() -> float:
+	if not _attacking:
+		return -1.0
+	return clamp(_attack_t / _attack_dur, 0.0, 1.0)
+
+
 func set_weapon_data(data: WeaponData) -> void:
 	_weapon_data = data
 
@@ -251,11 +291,20 @@ func _is_melee_weapon() -> bool:
 
 ## Aplica una rotación al bone como offset desde su rest pose. Lerp suave
 ## para evitar saltos. La rotación es Euler (x, y, z) en radianes.
-func _set_bone_rot(bone_idx: int, target_x: float, target_y: float, target_z: float, delta: float) -> void:
+## Si swap_pitch_roll_axes está activo Y is_limb es true, los valores X y Z
+## se intercambian. En estos rigs (capibara/puma) los huesos de limbs tienen
+## un bone roll distinto al de la columna/cabeza, así que el swap aplica solo
+## a brazos y piernas; spine y head conservan su convención.
+func _set_bone_rot(bone_idx: int, target_x: float, target_y: float, target_z: float, delta: float, is_limb: bool = false) -> void:
 	if bone_idx < 0 or _skeleton == null:
 		return
 	var rest_b: Basis = _rest_basis.get(bone_idx, Basis.IDENTITY)
-	var offset := Basis.from_euler(Vector3(target_x, target_y, target_z))
+	var euler: Vector3
+	if swap_pitch_roll_axes and is_limb:
+		euler = Vector3(target_z, target_y, target_x)
+	else:
+		euler = Vector3(target_x, target_y, target_z)
+	var offset := Basis.from_euler(euler)
 	var target_quat := (rest_b * offset).get_rotation_quaternion()
 	var current_quat := _skeleton.get_bone_pose_rotation(bone_idx)
 	var t := clampf(delta * smooth_speed, 0.0, 1.0)
@@ -336,20 +385,37 @@ func _process(delta: float) -> void:
 			thigh_target_l += -leg_walk_amp * 0.3 * stride
 			thigh_target_r += leg_walk_amp * 0.3 * stride
 	elif moving:
-		thigh_target_l = -leg_walk_amp * stride
-		thigh_target_r = leg_walk_amp * stride
+		# Cuando swap_pitch_roll_axes está activo, las piernas rotan alrededor
+		# de bone-Z, que está ESPEJADO entre L y R. Para alternar (un pie
+		# adelante, el otro atrás) necesitamos el MISMO signo en L y R; el
+		# espejo del bone-axis hace el resto. Sin swap, signos opuestos.
+		var leg_l_phase: float
+		var leg_r_phase: float
+		if swap_pitch_roll_axes:
+			leg_l_phase = leg_walk_amp * stride
+			leg_r_phase = leg_walk_amp * stride
+		else:
+			leg_l_phase = -leg_walk_amp * stride
+			leg_r_phase = leg_walk_amp * stride
+		thigh_target_l = leg_l_phase
+		thigh_target_r = leg_r_phase
 		shin_target_l = maxf(0.0, stride) * shin_walk_bend
 		shin_target_r = maxf(0.0, -stride) * shin_walk_bend
-		leg_roll_l = -leg_splay_z * stride
-		leg_roll_r = leg_splay_z * stride
+		# Splay también necesita mismo signo para alternar bajo swap.
+		if swap_pitch_roll_axes:
+			leg_roll_l = leg_splay_z * stride
+			leg_roll_r = leg_splay_z * stride
+		else:
+			leg_roll_l = -leg_splay_z * stride
+			leg_roll_r = leg_splay_z * stride
 	else:
 		shin_target_l = shin_idle_bend
 		shin_target_r = shin_idle_bend
 
-	_set_bone_rot(_b_thigh_l, thigh_target_l, 0.0, leg_roll_l, delta)
-	_set_bone_rot(_b_thigh_r, thigh_target_r, 0.0, leg_roll_r, delta)
-	_set_bone_rot(_b_shin_l, shin_target_l, 0.0, 0.0, delta)
-	_set_bone_rot(_b_shin_r, shin_target_r, 0.0, 0.0, delta)
+	_set_bone_rot(_b_thigh_l, thigh_target_l, 0.0, leg_roll_l, delta, true)
+	_set_bone_rot(_b_thigh_r, thigh_target_r, 0.0, leg_roll_r, delta, true)
+	_set_bone_rot(_b_shin_l, shin_target_l, 0.0, 0.0, delta, true)
+	_set_bone_rot(_b_shin_r, shin_target_r, 0.0, 0.0, delta, true)
 
 	# ============================================================
 	# TORSO + CABEZA  (spine_01 + neck/head)
@@ -387,6 +453,10 @@ func _process(delta: float) -> void:
 	var forearm_base_l: float
 	var forearm_base_r: float
 
+	# Pose base por arma. Para el rifle, ambas manos lo sujetan (la izq cruza
+	# al guardamano), no es un brazo "casual" colgando.
+	var arm_base_l_y: float = 0.0
+	var arm_base_r_y: float = 0.0
 	if _is_melee_weapon():
 		arm_base_l_x = -knife_arm_l_x
 		arm_base_r_x = -knife_arm_r_x
@@ -395,48 +465,90 @@ func _process(delta: float) -> void:
 		forearm_base_l = knife_forearm_l_bend
 		forearm_base_r = knife_forearm_r_bend
 	else:
-		arm_base_l_x = -arm_hold_x
+		# Brazo derecho: grip cerca del pecho.
+		# Brazo izquierdo: extendido al frente y cruzando para el guardamano.
+		# El extra_pitch lleva el brazo izq más adelante; el z_offset lo
+		# desplaza al centro del cuerpo (línea del rifle).
 		arm_base_r_x = -arm_hold_x
-		arm_base_l_z = arm_sway_z
+		arm_base_l_x = -arm_hold_x - rifle_arm_l_extra_pitch
+		arm_base_l_z = arm_sway_z + rifle_arm_l_z_offset
 		arm_base_r_z = -arm_sway_z
-		forearm_base_l = forearm_l_rest_x
-		forearm_base_r = forearm_r_rest_x
+		arm_base_l_y = rifle_arm_l_yaw
+		arm_base_r_y = rifle_arm_r_yaw
+		forearm_base_l = rifle_forearm_l_bend
+		forearm_base_r = rifle_forearm_r_bend
 
-	var arm_target_l := arm_base_l_x + bob - stride * arm_walk_amp * 0.65
-	var arm_target_r := arm_base_r_x + bob + stride * arm_walk_amp * 0.35
-	var arm_y_l := stride * arm_yaw_sway * 0.55
-	var arm_y_r := -stride * arm_yaw_sway * 0.35
-	var arm_z_l := arm_base_l_z + stride * arm_sway_z * 0.20
-	var arm_z_r := arm_base_r_z - stride * arm_sway_z * 0.12
+	# Sway de brazos al caminar: mismo problema de espejo que las piernas.
+	# Bajo swap, mismo signo en L/R; sin swap, signos opuestos.
+	var arm_pitch_l_sway: float
+	var arm_pitch_r_sway: float
+	var arm_z_l_sway: float
+	var arm_z_r_sway: float
+	if swap_pitch_roll_axes:
+		arm_pitch_l_sway = stride * arm_walk_amp * 0.65
+		arm_pitch_r_sway = stride * arm_walk_amp * 0.35
+		arm_z_l_sway = stride * arm_sway_z * 0.20
+		arm_z_r_sway = stride * arm_sway_z * 0.12
+	else:
+		arm_pitch_l_sway = -stride * arm_walk_amp * 0.65
+		arm_pitch_r_sway = stride * arm_walk_amp * 0.35
+		arm_z_l_sway = stride * arm_sway_z * 0.20
+		arm_z_r_sway = -stride * arm_sway_z * 0.12
+
+	var arm_target_l := arm_base_l_x + bob + arm_pitch_l_sway
+	var arm_target_r := arm_base_r_x + bob + arm_pitch_r_sway
+	var arm_y_l := arm_base_l_y + stride * arm_yaw_sway * 0.55
+	var arm_y_r := arm_base_r_y - stride * arm_yaw_sway * 0.35
+	var arm_z_l := arm_base_l_z + arm_z_l_sway
+	var arm_z_r := arm_base_r_z + arm_z_r_sway
 	var forearm_target_l := forearm_base_l
 	var forearm_target_r := forearm_base_r
 	var hand_z_l := 0.0
 	var hand_z_r := 0.0
 
-	# Reload (ambos brazos)
+	# Reload en 3 fases:
+	#   Fase 1 (0.00 → 0.35): el arma SUBE (lift). Brazo derecho lo eleva.
+	#   Fase 2 (0.30 → 0.70): el arma se INCLINA AL LATERAL. Brazo izquierdo
+	#                          va al cargador y tira hacia abajo (mag swap).
+	#   Fase 3 (0.65 → 1.00): RETORNO al frente (ready). Todo vuelve a 0.
+	# Se solapan ligeramente para evitar saltos (pose continua).
 	if reload_progress > 0.0 and reload_progress < 1.0:
-		var dip := sin(reload_progress * PI)
-		arm_target_l = arm_base_l_x + dip * reload_arm_l_pull
-		arm_y_l = -dip * reload_arm_l_yaw
-		arm_z_l = arm_base_l_z + dip * 0.20
-		forearm_target_l = forearm_base_l + dip * reload_forearm_l_bend
-		hand_z_l = dip * reload_hand_l_twist
-		arm_target_r = arm_base_r_x - dip * reload_arm_r_lift
-		forearm_target_r = forearm_base_r + dip * reload_forearm_r_bend
+		var lift: float = smoothstep(0.0, 0.35, reload_progress) - smoothstep(0.65, 1.0, reload_progress)
+		var side: float = smoothstep(0.30, 0.55, reload_progress) - smoothstep(0.70, 1.0, reload_progress)
+		var work: float = smoothstep(0.35, 0.55, reload_progress) - smoothstep(0.70, 0.95, reload_progress)
 
-	# Attack slash (solo melee, brazo derecho)
+		# Brazo derecho: sube en fase 1, gira al lateral en fase 2, vuelve en 3.
+		arm_target_r = arm_base_r_x - lift * reload_arm_r_lift
+		arm_y_r = side * reload_arm_r_side
+		arm_z_r = arm_base_r_z + lift * 0.15
+
+		# Brazo izquierdo: se acompaña al lift, luego coge el cargador (work).
+		arm_target_l = arm_base_l_x - lift * 0.45 + work * reload_arm_l_pull
+		arm_y_l = -work * reload_arm_l_yaw
+		arm_z_l = arm_base_l_z + work * 0.20
+		forearm_target_l = forearm_base_l + work * reload_forearm_l_bend
+		forearm_target_r = forearm_base_r + work * reload_forearm_r_bend
+		hand_z_l = work * reload_hand_l_twist
+
+	# Attack slash (solo melee). 2 fases: windup (brazo arriba) → strike (arco bajando).
 	if attack_progress > 0.0 and attack_progress < 1.0 and _is_melee_weapon():
-		var swing := sin(attack_progress * PI)
-		arm_target_r = arm_base_r_x - swing * attack_arm_r_swing
-		forearm_target_r = forearm_base_r + swing * attack_forearm_r_extend
-		arm_target_l = arm_base_l_x + swing * 0.15
+		var windup: float = smoothstep(0.0, 0.30, attack_progress) - smoothstep(0.30, 0.55, attack_progress)
+		var strike: float = smoothstep(0.30, 0.55, attack_progress) - smoothstep(0.55, 1.0, attack_progress)
+		# Windup: brazo derecho sube y se arma atrás
+		# Strike: brazo cae en arco hacia el frente, ligero cruce con yaw
+		arm_target_r = arm_base_r_x + windup * attack_arm_r_windup - strike * attack_arm_r_swing
+		arm_y_r = strike * attack_arm_r_yaw
+		arm_z_r = arm_base_r_z - strike * 0.30
+		forearm_target_r = forearm_base_r - windup * 0.20 + strike * attack_forearm_r_extend
+		# El brazo izquierdo acompaña ligeramente para balance visual
+		arm_target_l = arm_base_l_x + (windup - strike) * 0.15
 
-	_set_bone_rot(_b_upper_arm_l, arm_target_l, arm_y_l, arm_z_l, delta)
-	_set_bone_rot(_b_upper_arm_r, arm_target_r, arm_y_r, arm_z_r, delta)
-	_set_bone_rot(_b_forearm_l, forearm_target_l, 0.0, 0.0, delta)
-	_set_bone_rot(_b_forearm_r, forearm_target_r, 0.0, 0.0, delta)
-	_set_bone_rot(_b_hand_l, 0.0, 0.0, hand_z_l, delta)
-	_set_bone_rot(_b_hand_r, 0.0, 0.0, hand_z_r, delta)
+	_set_bone_rot(_b_upper_arm_l, arm_target_l, arm_y_l, arm_z_l, delta, true)
+	_set_bone_rot(_b_upper_arm_r, arm_target_r, arm_y_r, arm_z_r, delta, true)
+	_set_bone_rot(_b_forearm_l, forearm_target_l, 0.0, 0.0, delta, true)
+	_set_bone_rot(_b_forearm_r, forearm_target_r, 0.0, 0.0, delta, true)
+	_set_bone_rot(_b_hand_l, 0.0, 0.0, hand_z_l, delta, true)
+	_set_bone_rot(_b_hand_r, 0.0, 0.0, hand_z_r, delta, true)
 
 	# ============================================================
 	# TAIL (solo si el rig tiene tail bones, ej. puma)

@@ -65,9 +65,10 @@ nav_agent_path = NodePath("../NavigationAgent3D")
 [node name="HumanoidAnimator" type="Node" parent="."]
 script = ExtResource("8")
 visuals_path = NodePath("../Visuals")
+swap_pitch_roll_axes = true
 arm_hold_x = 0.5
-leg_walk_amp = 0.35
-arm_walk_amp = 0.05
+leg_walk_amp = 0.45
+arm_walk_amp = 0.07
 crouch_drop = 0.22
 walk_freq_factor = 1.45
 shin_walk_bend = 0.0

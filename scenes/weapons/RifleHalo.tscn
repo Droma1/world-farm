@@ -15,11 +15,14 @@ height = 0.14
 
 [node name="Rifle" type="Node3D"]
 
+; El GLB del rifle Halo está autoreado con el cañón a lo largo de +X y mide
+; ~2 m. Lo rotamos 90° en Y (+X → -Z = adelante del player) y lo escalamos
+; 0.45 para que mida ~0.9 m. La componente Y queda intacta.
 [node name="Model" parent="." instance=ExtResource("1")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+transform = Transform3D(0, 0, -0.45, 0, 0.45, 0, 0.45, 0, 0, 0, 0, 0.18)
 
 [node name="Muzzle" type="Marker3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.005, -0.46)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.04, -0.30)
 
 [node name="MuzzleFlash" type="Node3D" parent="Muzzle"]
 visible = false

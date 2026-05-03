@@ -12,8 +12,18 @@ extends CharacterBody3D
 @onready var movement: MovementComponent = $MovementComponent
 @onready var weapon: WeaponComponent = $WeaponComponent
 @onready var ai: EnemyAI = $EnemyAI
-@onready var animator: HumanoidAnimator = $HumanoidAnimator
+# El animator es duck-typed: HumanoidAnimator (puma) o BlockyAnimator (bloque).
+# Ambos exponen los mismos métodos públicos (trigger_reload, trigger_attack,
+# flash_hit, tint_body, set_dead, set_weapon_data) y propiedades de input.
+@onready var animator: Node = _resolve_animator()
 @onready var visuals: Node3D = $Visuals
+
+
+func _resolve_animator() -> Node:
+	for child in get_children():
+		if child.has_method("trigger_reload") and child.has_method("trigger_attack"):
+			return child
+	return null
 
 var _dying: bool = false
 
@@ -27,12 +37,37 @@ func _ready() -> void:
 	health.damaged.connect(_on_damaged)
 	health.died.connect(_on_died)
 	movement.step.connect(_on_step)
+	# Enganchar arma → animator para que el enemigo recargue / golpee con
+	# las mismas poses que el jugador (3 fases reload, slash arc).
+	if weapon:
+		weapon.reload_started.connect(_on_weapon_reload_started)
+		weapon.shot_fired.connect(_on_weapon_shot_fired)
+
+
+func _physics_process(_delta: float) -> void:
+	# Empuja la velocidad local al animator para que las piernas/brazos
+	# se animen acorde al movimiento (igual que el player).
+	if animator and movement:
+		animator.local_velocity = movement.local_velocity
+		animator.is_on_floor = is_on_floor()
+		animator.is_crouching = movement.is_crouching
 
 
 func _on_step() -> void:
 	if _dying:
 		return
 	AudioManager.play_3d(&"footstep", global_position, -12.0, 0.12, 40.0)
+
+
+func _on_weapon_reload_started() -> void:
+	if animator and weapon and weapon.current:
+		animator.trigger_reload(weapon.current.reload_time)
+
+
+func _on_weapon_shot_fired(weapon_data: WeaponData, _end: Vector3, _hit: Dictionary) -> void:
+	# Slash anim solo en melee (rango corto).
+	if animator and weapon_data and weapon_data.max_range < 5.0:
+		animator.trigger_attack(0.32)
 
 
 func _on_damaged(_amount: float, _source: Node) -> void:

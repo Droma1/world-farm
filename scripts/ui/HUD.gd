@@ -231,15 +231,25 @@ func _on_pickup_collected(kind: StringName, amount: float) -> void:
 func _on_weapon_equipped(data: WeaponData) -> void:
 	if data:
 		weapon_name_label.text = data.display_name
+	# El cuchillo (melee) no usa balas — ocultar el contador de munición.
+	var is_melee: bool = data != null and data.max_range < 5.0
+	ammo_label.visible = not is_melee
+	if is_melee:
+		reload_label.visible = false
 	if _player and _player.weapon:
 		_on_ammo_changed(_player.weapon.in_mag, _player.weapon.reserve)
 
 
 func _on_ammo_changed(in_mag: int, reserve: int) -> void:
+	if not ammo_label.visible:
+		return
 	ammo_label.text = "%d / %d" % [in_mag, reserve]
 
 
 func _on_reload_started() -> void:
+	if _player and _player.weapon and _player.weapon.current \
+			and _player.weapon.current.max_range < 5.0:
+		return  # melee no recarga
 	reload_label.visible = true
 
 
@@ -250,6 +260,11 @@ func _on_reload_finished() -> void:
 func _on_weapon_swapped(weapon_data: Resource, _slot: int) -> void:
 	if weapon_data and "display_name" in weapon_data:
 		weapon_name_label.text = weapon_data.display_name
+	var is_melee: bool = weapon_data != null and "max_range" in weapon_data \
+			and weapon_data.max_range < 5.0
+	ammo_label.visible = not is_melee
+	if is_melee:
+		reload_label.visible = false
 
 
 # ============================================================
