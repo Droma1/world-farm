@@ -1,0 +1,22 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/resources/WeaponData.gd" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/Shotgun.tscn" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"shotgun_basic"
+display_name = "Escopeta Tactica"
+weapon_scene = ExtResource("2")
+damage = 12.0
+headshot_multiplier = 1.7
+damage_type = 0
+max_range = 22.0
+fire_mode = 0
+rounds_per_minute = 80.0
+spread_degrees = 6.5
+pellets_per_shot = 8
+mag_size = 6
+reserve_ammo = 36
+reload_time = 2.6
+recoil_kick = Vector2(0.7, 1.4)

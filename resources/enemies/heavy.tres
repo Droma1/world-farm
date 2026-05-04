@@ -6,6 +6,11 @@
 [resource]
 script = ExtResource("1")
 display_name = "Puma Blindado"
+archetype = 2
+drop_weight_health = 0.55
+drop_weight_ammo = 0.30
+drop_weight_speed = 0.05
+drop_weight_armor = 0.10
 max_health = 180.0
 move_speed = 1.8
 weapon = ExtResource("2")

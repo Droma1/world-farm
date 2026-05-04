@@ -12,8 +12,24 @@ extends Node
 @export var font_size: int = 32
 
 
+var _headshot_targets: Dictionary = {}   # collider id → true por 1 frame para colorear el siguiente damage_number
+var _last_headshot_target_id: int = 0
+
+
 func _ready() -> void:
 	EventBus.damage_dealt.connect(_on_damage_dealt)
+	EventBus.headshot.connect(_on_headshot)
+
+
+func _on_headshot(target: Object, source: Node) -> void:
+	# Marcar el target como "headshot" para que el siguiente damage_number
+	# se dibuje en rojo grande. La signal headshot se emite ANTES que
+	# damage_dealt en el mismo hitscan, así que llegará antes.
+	if source != GameState.local_player:
+		return
+	if target == null:
+		return
+	_last_headshot_target_id = target.get_instance_id()
 
 
 func _on_damage_dealt(target: Object, amount: float, source: Node) -> void:
@@ -22,16 +38,25 @@ func _on_damage_dealt(target: Object, amount: float, source: Node) -> void:
 		return
 	if not (target is Node3D):
 		return
-	_spawn_number(target as Node3D, amount)
+	var was_headshot: bool = (target.get_instance_id() == _last_headshot_target_id)
+	_last_headshot_target_id = 0  # consume el flag
+	_spawn_number(target as Node3D, amount, was_headshot)
 
 
-func _spawn_number(target: Node3D, amount: float) -> void:
+func _spawn_number(target: Node3D, amount: float, headshot: bool = false) -> void:
 	var label := Label3D.new()
-	label.text = "%d" % int(round(amount))
-	label.font_size = font_size
+	if headshot:
+		label.text = "%d!" % int(round(amount))
+		label.font_size = font_size + 14
+	else:
+		label.text = "%d" % int(round(amount))
+		label.font_size = font_size
 	label.outline_size = 6
 	label.outline_modulate = Color(0, 0, 0, 1)
-	label.modulate = color_high if amount >= high_threshold else color_normal
+	if headshot:
+		label.modulate = Color(1.0, 0.25, 0.25, 1.0)
+	else:
+		label.modulate = color_high if amount >= high_threshold else color_normal
 	label.billboard = BaseMaterial3D.BILLBOARD_ENABLED
 	label.no_depth_test = true                # se ve a través de paredes
 	label.fixed_size = true                   # tamaño constante en pantalla

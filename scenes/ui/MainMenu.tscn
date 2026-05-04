@@ -238,7 +238,17 @@ theme_override_font_sizes/font_size = 23
 theme_override_styles/normal = SubResource("ButtonNormal")
 theme_override_styles/hover = SubResource("ButtonHover")
 theme_override_styles/pressed = SubResource("ButtonPressed")
-text = "JUGAR"
+text = "JUGAR  -  ARENA"
+alignment = 0
+
+[node name="PlayHangarButton" type="Button" parent="Container/Buttons"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+text = "JUGAR  -  HANGAR"
 alignment = 0
 
 [node name="OptionsButton" type="Button" parent="Container/Buttons"]
@@ -249,6 +259,36 @@ theme_override_styles/normal = SubResource("ButtonNormal")
 theme_override_styles/hover = SubResource("ButtonHover")
 theme_override_styles/pressed = SubResource("ButtonPressed")
 text = "OPCIONES"
+alignment = 0
+
+[node name="LoadoutButton" type="Button" parent="Container/Buttons"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+text = "LOADOUT"
+alignment = 0
+
+[node name="CodexButton" type="Button" parent="Container/Buttons"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+text = "CODEX"
+alignment = 0
+
+[node name="AchievementsButton" type="Button" parent="Container/Buttons"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+theme_override_font_sizes/font_size = 19
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+text = "LOGROS"
 alignment = 0
 
 [node name="QuitButton" type="Button" parent="Container/Buttons"]
@@ -342,6 +382,48 @@ max_value = 1.0
 step = 0.01
 value = 0.8
 
+[node name="DiffRow" type="HBoxContainer" parent="OptionsPanel/Container"]
+layout_mode = 2
+
+[node name="DiffLabel" type="Label" parent="OptionsPanel/Container/DiffRow"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+text = "Dificultad"
+theme_override_font_sizes/font_size = 18
+
+[node name="DiffEasy" type="Button" parent="OptionsPanel/Container/DiffRow"]
+custom_minimum_size = Vector2(80, 36)
+layout_mode = 2
+text = "FACIL"
+theme_override_font_sizes/font_size = 14
+
+[node name="DiffNormal" type="Button" parent="OptionsPanel/Container/DiffRow"]
+custom_minimum_size = Vector2(80, 36)
+layout_mode = 2
+text = "NORMAL"
+theme_override_font_sizes/font_size = 14
+
+[node name="DiffHard" type="Button" parent="OptionsPanel/Container/DiffRow"]
+custom_minimum_size = Vector2(80, 36)
+layout_mode = 2
+text = "DIFICIL"
+theme_override_font_sizes/font_size = 14
+
+[node name="IronModeRow" type="HBoxContainer" parent="OptionsPanel/Container"]
+layout_mode = 2
+
+[node name="IronLabel" type="Label" parent="OptionsPanel/Container/IronModeRow"]
+custom_minimum_size = Vector2(160, 0)
+layout_mode = 2
+text = "Iron Mode (+60% score)"
+theme_override_font_sizes/font_size = 18
+modulate = Color(1, 0.55, 0.55, 1)
+
+[node name="IronCheck" type="CheckBox" parent="OptionsPanel/Container/IronModeRow"]
+layout_mode = 2
+text = "ACTIVAR"
+theme_override_font_sizes/font_size = 14
+
 [node name="Spacer" type="Control" parent="OptionsPanel/Container"]
 custom_minimum_size = Vector2(0, 12)
 layout_mode = 2
@@ -354,3 +436,221 @@ theme_override_styles/normal = SubResource("ButtonNormal")
 theme_override_styles/hover = SubResource("ButtonHover")
 theme_override_styles/pressed = SubResource("ButtonPressed")
 text = "VOLVER"
+
+; ============================================================
+;  AchievementsPanel — lista de logros
+; ============================================================
+[node name="AchievementsPanel" type="Control" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="BG3" type="ColorRect" parent="AchievementsPanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.85)
+mouse_filter = 2
+
+[node name="Container" type="VBoxContainer" parent="AchievementsPanel"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -360.0
+offset_top = -260.0
+offset_right = 360.0
+offset_bottom = 260.0
+theme_override_constants/separation = 14
+
+[node name="AchievementsTitle" type="Label" parent="AchievementsPanel/Container"]
+horizontal_alignment = 1
+text = "LOGROS"
+theme_override_font_sizes/font_size = 36
+modulate = Color(1, 0.85, 0.4, 1)
+
+[node name="ProgressLabel" type="Label" parent="AchievementsPanel/Container"]
+horizontal_alignment = 1
+text = ""
+theme_override_font_sizes/font_size = 16
+modulate = Color(0.7, 0.85, 1, 1)
+
+[node name="ScrollContainer" type="ScrollContainer" parent="AchievementsPanel/Container"]
+custom_minimum_size = Vector2(0, 360)
+size_flags_vertical = 3
+
+[node name="List" type="VBoxContainer" parent="AchievementsPanel/Container/ScrollContainer"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="BackButton2" type="Button" parent="AchievementsPanel/Container"]
+custom_minimum_size = Vector2(0, 44)
+text = "VOLVER"
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+
+; ============================================================
+;  LoadoutPanel — selector de armas + granadas
+; ============================================================
+[node name="LoadoutPanel" type="Control" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="BG4" type="ColorRect" parent="LoadoutPanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.85)
+mouse_filter = 2
+
+[node name="Container" type="VBoxContainer" parent="LoadoutPanel"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -240.0
+offset_right = 260.0
+offset_bottom = 240.0
+theme_override_constants/separation = 14
+
+[node name="LTitle" type="Label" parent="LoadoutPanel/Container"]
+horizontal_alignment = 1
+text = "LOADOUT"
+theme_override_font_sizes/font_size = 36
+modulate = Color(1, 0.85, 0.4, 1)
+
+[node name="LHint" type="Label" parent="LoadoutPanel/Container"]
+horizontal_alignment = 1
+text = "Selecciona las armas que quieres llevar (1-4)."
+theme_override_font_sizes/font_size = 14
+modulate = Color(0.7, 0.85, 1, 1)
+
+[node name="WeaponsList" type="VBoxContainer" parent="LoadoutPanel/Container"]
+theme_override_constants/separation = 6
+
+[node name="LRifle" type="CheckBox" parent="LoadoutPanel/Container/WeaponsList"]
+text = "Rifle de Asalto"
+button_pressed = true
+theme_override_font_sizes/font_size = 17
+
+[node name="LPistol" type="CheckBox" parent="LoadoutPanel/Container/WeaponsList"]
+text = "Pistola"
+button_pressed = true
+theme_override_font_sizes/font_size = 17
+
+[node name="LShotgun" type="CheckBox" parent="LoadoutPanel/Container/WeaponsList"]
+text = "Escopeta Tactica"
+button_pressed = true
+theme_override_font_sizes/font_size = 17
+
+[node name="LKnife" type="CheckBox" parent="LoadoutPanel/Container/WeaponsList"]
+text = "Cuchillo Tactico"
+button_pressed = true
+theme_override_font_sizes/font_size = 17
+
+[node name="LSniper" type="CheckBox" parent="LoadoutPanel/Container/WeaponsList"]
+text = "Rifle Francotirador"
+button_pressed = false
+theme_override_font_sizes/font_size = 17
+
+[node name="GrenadeRow" type="HBoxContainer" parent="LoadoutPanel/Container"]
+
+[node name="GLabel" type="Label" parent="LoadoutPanel/Container/GrenadeRow"]
+custom_minimum_size = Vector2(160, 0)
+text = "Granadas"
+theme_override_font_sizes/font_size = 18
+
+[node name="GSpinBox" type="SpinBox" parent="LoadoutPanel/Container/GrenadeRow"]
+custom_minimum_size = Vector2(120, 0)
+min_value = 0
+max_value = 5
+step = 1
+value = 2
+
+[node name="LSaveButton" type="Button" parent="LoadoutPanel/Container"]
+custom_minimum_size = Vector2(0, 44)
+text = "GUARDAR Y VOLVER"
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonPressed")
+
+; ============================================================
+;  CodexPanel — fragmentos narrativos (lore Helix/N.O.A/CAPY-0)
+; ============================================================
+[node name="CodexPanel" type="Control" parent="."]
+visible = false
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+
+[node name="BG5" type="ColorRect" parent="CodexPanel"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0, 0, 0, 0.92)
+mouse_filter = 2
+
+[node name="Container" type="VBoxContainer" parent="CodexPanel"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -480.0
+offset_top = -300.0
+offset_right = 480.0
+offset_bottom = 300.0
+theme_override_constants/separation = 12
+
+[node name="CTitle" type="Label" parent="CodexPanel/Container"]
+horizontal_alignment = 1
+text = "CODEX"
+theme_override_font_sizes/font_size = 36
+modulate = Color(0.6, 0.85, 1, 1)
+
+[node name="CProgressLabel" type="Label" parent="CodexPanel/Container"]
+horizontal_alignment = 1
+text = ""
+theme_override_font_sizes/font_size = 14
+modulate = Color(0.7, 0.85, 1, 1)
+
+[node name="Split" type="HBoxContainer" parent="CodexPanel/Container"]
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="LeftScroll" type="ScrollContainer" parent="CodexPanel/Container/Split"]
+custom_minimum_size = Vector2(280, 380)
+
+[node name="EntryList" type="VBoxContainer" parent="CodexPanel/Container/Split/LeftScroll"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="RightPanel" type="PanelContainer" parent="CodexPanel/Container/Split"]
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="RightVBox" type="VBoxContainer" parent="CodexPanel/Container/Split/RightPanel"]
+theme_override_constants/separation = 10
+
+[node name="EntryTitle" type="Label" parent="CodexPanel/Container/Split/RightPanel/RightVBox"]
+text = "Selecciona un fragmento"
+theme_override_font_sizes/font_size = 22
+modulate = Color(1, 0.85, 0.4, 1)
+horizontal_alignment = 0
+
+[node name="EntryBody" type="Label" parent="CodexPanel/Container/Split/RightPanel/RightVBox"]
+text = ""
+theme_override_font_sizes/font_size = 15
+autowrap_mode = 3
+size_flags_vertical = 3
+
+[node name="CBackButton" type="Button" parent="CodexPanel/Container"]
+custom_minimum_size = Vector2(0, 44)
+text = "VOLVER"
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("ButtonNormal")
+theme_override_styles/hover = SubResource("ButtonHover")
+theme_override_styles/pressed = SubResource("ButtonPressed")

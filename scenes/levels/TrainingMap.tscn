@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" path="res://scenes/characters/enemies/Enemy.tscn" id="4"]
 [ext_resource type="Script" path="res://scripts/levels/TrainingMap.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/systems/spawning/WaveSystem.gd" id="6"]
+[ext_resource type="Script" path="res://scripts/levels/PropDecorator.gd" id="PropDecScript"]
 [ext_resource type="Script" path="res://scripts/resources/WaveData.gd" id="7"]
 [ext_resource type="Resource" path="res://resources/enemies/grunt.tres" id="EnemyGrunt"]
 [ext_resource type="Resource" path="res://resources/enemies/heavy.tres" id="EnemyHeavy"]
@@ -14,7 +15,6 @@
 [ext_resource type="Resource" path="res://resources/enemies/acid.tres" id="EnemyAcid"]
 [ext_resource type="Resource" path="res://resources/enemies/alpha.tres" id="EnemyAlpha"]
 [ext_resource type="Resource" path="res://resources/enemies/blocky_drone.tres" id="EnemyBlocky"]
-[ext_resource type="PackedScene" path="res://scenes/characters/enemies/EnemyBlocky.tscn" id="SceneBlocky"]
 [ext_resource type="PackedScene" path="res://assets/models/props/solar_outpost.glb" id="PropHouse"]
 [ext_resource type="PackedScene" path="res://assets/models/props/ruins_wall.glb" id="PropRuins"]
 
@@ -38,27 +38,35 @@ spawn_interval = 1.2
 script = ExtResource("7")
 name = "Oleada 3 — Tóxicos y francotiradores"
 enemy_scene = ExtResource("4")
-enemy_data_list = Array[Resource]([ExtResource("EnemySniper"), ExtResource("EnemyAcid"), ExtResource("EnemySwift")])
-enemy_counts = Array[int]([2, 2, 2])
+enemy_data_list = Array[Resource]([ExtResource("EnemySniper"), ExtResource("EnemyAcid"), ExtResource("EnemySwift"), ExtResource("EnemyBlocky")])
+enemy_counts = Array[int]([2, 2, 2, 2])
 spawn_interval = 1.3
 
 [sub_resource type="Resource" id="Wave4"]
 script = ExtResource("7")
 name = "Oleada 4 — Alpha desciende"
 enemy_scene = ExtResource("4")
-enemy_data_list = Array[Resource]([ExtResource("EnemySwift"), ExtResource("EnemyHeavy"), ExtResource("EnemyAcid"), ExtResource("EnemyAlpha")])
-enemy_counts = Array[int]([3, 2, 2, 1])
+enemy_data_list = Array[Resource]([ExtResource("EnemySwift"), ExtResource("EnemyHeavy"), ExtResource("EnemyAcid"), ExtResource("EnemyBlocky"), ExtResource("EnemyAlpha")])
+enemy_counts = Array[int]([3, 2, 2, 2, 1])
 spawn_interval = 0.9
 
-; Oleada 5 — Drones del Consorcio Helix (encaja con Acto 2 narrativo).
-; Usa otra enemy_scene (EnemyBlocky.tscn) con su propio rig + animator.
+; Oleada 5 — Pre-glitch. Mezcla pumas y drones, alta densidad.
 [sub_resource type="Resource" id="Wave5"]
 script = ExtResource("7")
-name = "Oleada 5 — Drones Helix"
-enemy_scene = ExtResource("SceneBlocky")
-enemy_data_list = Array[Resource]([ExtResource("EnemyBlocky")])
-enemy_counts = Array[int]([6])
-spawn_interval = 1.0
+name = "Oleada 5 — Asalto coordinado"
+enemy_scene = ExtResource("4")
+enemy_data_list = Array[Resource]([ExtResource("EnemyBlocky"), ExtResource("EnemyHeavy"), ExtResource("EnemyAcid"), ExtResource("EnemyAlpha")])
+enemy_counts = Array[int]([4, 2, 3, 1])
+spawn_interval = 0.8
+
+; Oleada 6 — Acto 3: la simulacion empieza a fallar (glitches).
+[sub_resource type="Resource" id="Wave6"]
+script = ExtResource("7")
+name = "Oleada 6 — ANOMALIA DETECTADA"
+enemy_scene = ExtResource("4")
+enemy_data_list = Array[Resource]([ExtResource("EnemySwift"), ExtResource("EnemyBlocky"), ExtResource("EnemyAcid"), ExtResource("EnemyAlpha")])
+enemy_counts = Array[int]([4, 4, 3, 2])
+spawn_interval = 0.7
 
 [sub_resource type="NavigationMesh" id="NavMesh"]
 geometry_parsed_geometry_type = 1
@@ -591,10 +599,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 18, 0, -10)
 ; --- WaveSystem ---
 [node name="WaveSystem" type="Node" parent="."]
 script = ExtResource("6")
-waves = Array[Resource]([SubResource("Wave1"), SubResource("Wave2"), SubResource("Wave3"), SubResource("Wave4"), SubResource("Wave5")])
+waves = Array[Resource]([SubResource("Wave1"), SubResource("Wave2"), SubResource("Wave3"), SubResource("Wave4"), SubResource("Wave5"), SubResource("Wave6")])
 spawn_points_path = NodePath("../SpawnPoints")
-initial_delay = 4.0
+initial_delay = 6.0
 time_between_waves = 5.0
+
+; --- PropDecorator: auto-coloca props CC0 (Kenney) alrededor del origen
+;     para llenar la arena. Configurable desde el inspector.
+[node name="PropDecorator" type="Node3D" parent="."]
+script = ExtResource("PropDecScript")
+spawn_radius = 38.0
+inner_exclusion = 5.0
+prop_count = 28
 
 ; --- HUD ---
 [node name="HUD" parent="." instance=ExtResource("3")]

@@ -75,6 +75,8 @@ func _ready() -> void:
 		_weapon.shot_fired.connect(_on_shot_fired)
 		_weapon.reload_started.connect(_on_reload_started)
 		_weapon.reload_finished.connect(_on_reload_finished)
+	# Pellets de shotgun: tracer extra por cada uno (no muzzle flash extra).
+	EventBus.pellet_fired.connect(_on_pellet_fired)
 
 
 func _process(delta: float) -> void:
@@ -201,6 +203,21 @@ func _on_shot_fired(data: WeaponData, end_point: Vector3, hit_data: Dictionary) 
 	elif not hit_character:
 		_spawn_decal(hit_pos, hit_normal)
 		_spawn_sparks(hit_pos, hit_normal)
+
+
+func _on_pellet_fired(_data: Resource, origin: Vector3, end_point: Vector3, hit_data: Dictionary) -> void:
+	# Solo dibujamos tracer si este WeaponVFX pertenece al weapon que disparó.
+	# (Los pellets emiten globalmente; filtramos por proximidad al muzzle).
+	if not is_instance_valid(_muzzle):
+		return
+	if origin.distance_to(_muzzle.global_position) > 0.8:
+		return
+	_spawn_tracer(_muzzle.global_position, end_point)
+	# Sparks pequeños en el punto de impacto si es pared.
+	if not hit_data.is_empty():
+		var collider: Object = hit_data.get("collider")
+		if not (collider is CharacterBody3D):
+			_spawn_sparks(hit_data.get("position", end_point), hit_data.get("normal", Vector3.UP))
 
 
 func _on_reload_started() -> void:

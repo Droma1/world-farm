@@ -1,0 +1,26 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/ThrownKnife.gd" id="1"]
+
+[sub_resource type="BoxShape3D" id="KShape"]
+size = Vector3(0.04, 0.04, 0.32)
+
+[sub_resource type="BoxMesh" id="KMesh"]
+size = Vector3(0.04, 0.04, 0.32)
+
+[sub_resource type="StandardMaterial3D" id="KMat"]
+albedo_color = Color(0.85, 0.88, 0.95, 1)
+metallic = 0.85
+roughness = 0.2
+
+[node name="ThrownKnife" type="RigidBody3D"]
+script = ExtResource("1")
+mass = 0.18
+gravity_scale = 1.0
+
+[node name="Col" type="CollisionShape3D" parent="."]
+shape = SubResource("KShape")
+
+[node name="Mesh" type="MeshInstance3D" parent="."]
+mesh = SubResource("KMesh")
+material_override = SubResource("KMat")

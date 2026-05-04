@@ -21,6 +21,10 @@ enum DamageType { HITSCAN, PROJECTILE }
 @export var fire_mode: FireMode = FireMode.SEMI
 @export var rounds_per_minute: float = 600.0
 @export var spread_degrees: float = 1.5
+## Pellets disparados por cada trigger pull. Para shotgun: típicamente 6-10.
+## Para rifles/pistolas/sniper: 1. La munición consumida sigue siendo 1 por
+## "shot", no por pellet — un cartucho de escopeta = 1 ammo.
+@export var pellets_per_shot: int = 1
 
 @export_group("Ammo")
 @export var mag_size: int = 12

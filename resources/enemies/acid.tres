@@ -6,6 +6,7 @@
 [resource]
 script = ExtResource("1")
 display_name = "Puma Tóxico"
+archetype = 4
 max_health = 90.0
 move_speed = 3.5
 weapon = ExtResource("2")

@@ -10,6 +10,8 @@ signal died
 @export var max_health: float = 100.0
 
 var current_health: float
+var last_damage_source: Node = null   ## Quien dio el último golpe (death cam)
+var invulnerable: bool = false        ## True durante dash, animación de muerte etc.
 
 
 func _ready() -> void:
@@ -19,7 +21,10 @@ func _ready() -> void:
 func take_damage(amount: float, source: Node = null) -> void:
 	if current_health <= 0.0 or amount <= 0.0:
 		return
+	if invulnerable:
+		return
 	current_health = max(0.0, current_health - amount)
+	last_damage_source = source
 	damaged.emit(amount, source)
 	EventBus.entity_damaged.emit(get_parent(), amount)
 	if current_health == 0.0:

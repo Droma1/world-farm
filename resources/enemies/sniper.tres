@@ -6,6 +6,11 @@
 [resource]
 script = ExtResource("1")
 display_name = "Puma Francotirador"
+archetype = 3
+drop_weight_health = 0.20
+drop_weight_ammo = 0.55
+drop_weight_speed = 0.20
+drop_weight_armor = 0.05
 max_health = 35.0
 move_speed = 2.5
 weapon = ExtResource("2")

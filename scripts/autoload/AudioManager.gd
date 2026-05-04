@@ -36,12 +36,33 @@ const STREAM_VARIATIONS: Dictionary = {
 	&"reload_click": [
 		"res://assets/audio/sfx/weapon/reload_click.ogg",
 	],
+	# Sonidos cronometrados con la animación de recarga 3 fases (lift/side/return).
+	&"reload_mag_out": [
+		"res://assets/audio/sfx/weapon/reload_mag_out.ogg",
+	],
+	&"reload_mag_in": [
+		"res://assets/audio/sfx/weapon/reload_mag_in.ogg",
+	],
+	&"reload_bolt": [
+		"res://assets/audio/sfx/weapon/reload_bolt.ogg",
+	],
+	# Swoosh sci-fi del cuchillo (reemplaza el SFX de balazo en melee).
+	&"knife_swoosh": [
+		"res://assets/audio/sfx/weapon/knife_swoosh_01.ogg",
+		"res://assets/audio/sfx/weapon/knife_swoosh_02.ogg",
+	],
+	# Explosion (granada).
+	&"explosion": [
+		"res://assets/audio/sfx/weapon/explosion_01.ogg",
+		"res://assets/audio/sfx/weapon/explosion_02.ogg",
+	],
 }
 
 # Pistas de música. La key se usa con play_music(key). CC0 OpenGameArt.
 const MUSIC_TRACKS: Dictionary = {
 	&"combat_loop": "res://assets/audio/music/combat_loop.ogg",
 	&"combat_intense": "res://assets/audio/music/combat_intense.ogg",
+	&"menu_ambient": "res://assets/audio/music/menu_ambient.mp3",
 }
 
 @export var music_default_db: float = -8.0  ## Volumen "objetivo" de la música
@@ -53,6 +74,11 @@ var _music_streams: Dictionary = {}
 var _music_player: AudioStreamPlayer
 var _music_tween: Tween
 var _current_music_key: StringName = &""
+
+# Bus fallback: si el proyecto NO tiene un bus_layout custom con Music/SFX,
+# todos los players se mandan a Master. Esto se calcula en _ready.
+var _bus_music: StringName = &"Master"
+var _bus_sfx: StringName = &"Master"
 
 
 func _ready() -> void:
@@ -69,17 +95,25 @@ func _ready() -> void:
 	for key in MUSIC_TRACKS.keys():
 		var s := load(MUSIC_TRACKS[key]) as AudioStream
 		if s:
-			# OGG Vorbis loops nativos en Godot si seteamos loop=true.
+			# OGG Vorbis y MP3 soportan loop nativo en Godot.
 			if s is AudioStreamOggVorbis:
 				(s as AudioStreamOggVorbis).loop = true
+			elif s is AudioStreamMP3:
+				(s as AudioStreamMP3).loop = true
 			_music_streams[key] = s
 		else:
 			push_warning("AudioManager: no pudo cargar música %s" % MUSIC_TRACKS[key])
 
-	# Player único de música. Usamos un único bus "Master" por simplicidad;
-	# el volumen general se controla vía Settings.master_volume → bus volume.
+	# Resolver buses: si el proyecto define Music/SFX (vía default_bus_layout)
+	# los usamos; si no, fallback a Master. Evita warnings de "bus not found".
+	if AudioServer.get_bus_index(&"Music") >= 0:
+		_bus_music = &"Music"
+	if AudioServer.get_bus_index(&"SFX") >= 0:
+		_bus_sfx = &"SFX"
+	# Player único de música. Bus dedicado "Music" (controlado independiente
+	# del SFX). El volumen general (Master) sigue en Settings.master_volume.
 	_music_player = AudioStreamPlayer.new()
-	_music_player.bus = &"Master"
+	_music_player.bus = _bus_music
 	_music_player.volume_db = -80.0  # silencio inicial
 	add_child(_music_player)
 
@@ -108,6 +142,7 @@ func play_3d(sound: StringName, world_pos: Vector3, volume_db: float = 0.0,
 	p.unit_size = 8.0
 	p.max_distance = max_distance
 	p.attenuation_filter_cutoff_hz = 8000.0
+	p.bus = _bus_sfx
 	get_tree().current_scene.add_child(p)
 	p.global_position = world_pos
 	p.play()
@@ -123,6 +158,7 @@ func play_2d(sound: StringName, volume_db: float = 0.0,
 	p.stream = stream
 	p.volume_db = volume_db
 	p.pitch_scale = 1.0 + RNG.randf_range(-pitch_jitter, pitch_jitter)
+	p.bus = _bus_sfx
 	get_tree().current_scene.add_child(p)
 	p.play()
 	p.finished.connect(p.queue_free)

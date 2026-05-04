@@ -6,6 +6,11 @@
 [resource]
 script = ExtResource("1")
 display_name = "Puma Veloz"
+archetype = 1
+drop_weight_health = 0.30
+drop_weight_ammo = 0.20
+drop_weight_speed = 0.45
+drop_weight_armor = 0.05
 max_health = 40.0
 move_speed = 7.0
 weapon = ExtResource("2")

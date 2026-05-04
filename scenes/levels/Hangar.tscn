@@ -1,0 +1,236 @@
+[gd_scene load_steps=20 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/characters/player/Player.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/ui/HUD.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://scenes/characters/enemies/Enemy.tscn" id="3"]
+[ext_resource type="Script" path="res://scripts/levels/TrainingMap.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/systems/spawning/WaveSystem.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/resources/WaveData.gd" id="6"]
+[ext_resource type="Script" path="res://scripts/levels/PropDecorator.gd" id="7"]
+[ext_resource type="Resource" path="res://resources/enemies/grunt.tres" id="EG"]
+[ext_resource type="Resource" path="res://resources/enemies/heavy.tres" id="EH"]
+[ext_resource type="Resource" path="res://resources/enemies/swift.tres" id="ES"]
+[ext_resource type="Resource" path="res://resources/enemies/acid.tres" id="EA"]
+[ext_resource type="Resource" path="res://resources/enemies/blocky_drone.tres" id="EB"]
+[ext_resource type="Resource" path="res://resources/enemies/alpha.tres" id="EAL"]
+
+[sub_resource type="Resource" id="W1"]
+script = ExtResource("6")
+name = "Hangar 1 - Reconocimiento"
+enemy_scene = ExtResource("3")
+enemy_data_list = Array[Resource]([ExtResource("EG"), ExtResource("ES")])
+enemy_counts = Array[int]([3, 2])
+spawn_interval = 1.2
+
+[sub_resource type="Resource" id="W2"]
+script = ExtResource("6")
+name = "Hangar 2 - Densidad"
+enemy_scene = ExtResource("3")
+enemy_data_list = Array[Resource]([ExtResource("ES"), ExtResource("EH"), ExtResource("EA"), ExtResource("EB")])
+enemy_counts = Array[int]([3, 2, 2, 2])
+spawn_interval = 1.0
+
+[sub_resource type="Resource" id="W3"]
+script = ExtResource("6")
+name = "Hangar 3 - Final"
+enemy_scene = ExtResource("3")
+enemy_data_list = Array[Resource]([ExtResource("ES"), ExtResource("EH"), ExtResource("EA"), ExtResource("EB"), ExtResource("EAL")])
+enemy_counts = Array[int]([4, 2, 3, 3, 1])
+spawn_interval = 0.7
+
+[sub_resource type="NavigationMesh" id="NavMesh"]
+geometry_parsed_geometry_type = 1
+geometry_collision_mask = 1
+geometry_source_geometry_mode = 1
+geometry_source_group_name = &"navmesh"
+cell_size = 0.25
+cell_height = 0.2
+agent_height = 1.8
+agent_radius = 0.5
+agent_max_climb = 0.4
+agent_max_slope = 45.0
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMat_H"]
+sky_top_color = Color(0.10, 0.12, 0.18, 1)
+sky_horizon_color = Color(0.25, 0.20, 0.30, 1)
+ground_bottom_color = Color(0.04, 0.05, 0.08, 1)
+ground_horizon_color = Color(0.18, 0.18, 0.22, 1)
+sun_angle_max = 35.0
+
+[sub_resource type="Sky" id="Sky_H"]
+sky_material = SubResource("SkyMat_H")
+
+[sub_resource type="Environment" id="Env_H"]
+background_mode = 2
+sky = SubResource("Sky_H")
+ambient_light_source = 3
+ambient_light_color = Color(0.55, 0.65, 0.85, 1)
+ambient_light_energy = 0.45
+tonemap_mode = 2
+tonemap_exposure = 0.95
+fog_enabled = true
+fog_light_color = Color(0.30, 0.35, 0.45, 1)
+fog_density = 0.0035
+
+[sub_resource type="StandardMaterial3D" id="FloorMat_H"]
+albedo_color = Color(0.18, 0.20, 0.24, 1)
+metallic = 0.3
+roughness = 0.7
+
+[sub_resource type="StandardMaterial3D" id="WallMat_H"]
+albedo_color = Color(0.32, 0.34, 0.38, 1)
+metallic = 0.4
+roughness = 0.55
+
+[sub_resource type="BoxMesh" id="FloorMesh_H"]
+size = Vector3(60, 0.5, 60)
+
+[sub_resource type="BoxShape3D" id="FloorShape_H"]
+size = Vector3(60, 0.5, 60)
+
+[sub_resource type="BoxMesh" id="WallMesh_H"]
+size = Vector3(60, 6, 0.5)
+
+[sub_resource type="BoxShape3D" id="WallShape_H"]
+size = Vector3(60, 6, 0.5)
+
+[sub_resource type="BoxMesh" id="WallMeshSide_H"]
+size = Vector3(0.5, 6, 60)
+
+[sub_resource type="BoxShape3D" id="WallShapeSide_H"]
+size = Vector3(0.5, 6, 60)
+
+[node name="Hangar" type="Node3D"]
+script = ExtResource("4")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env_H")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.25, 0.433, 0, 0.866, 0.5, -0.5, -0.433, 0.75, 0, 18, 0)
+light_color = Color(0.85, 0.92, 1, 1)
+light_energy = 0.7
+shadow_enabled = true
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="."]
+navigation_mesh = SubResource("NavMesh")
+
+[node name="Floor" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/Floor"]
+mesh = SubResource("FloorMesh_H")
+material_override = SubResource("FloorMat_H")
+
+[node name="Col" type="CollisionShape3D" parent="NavigationRegion3D/Floor"]
+shape = SubResource("FloorShape_H")
+
+; --- 4 paredes exteriores ---
+[node name="WallN" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, -30)
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/WallN"]
+mesh = SubResource("WallMesh_H")
+material_override = SubResource("WallMat_H")
+
+[node name="Col" type="CollisionShape3D" parent="NavigationRegion3D/WallN"]
+shape = SubResource("WallShape_H")
+
+[node name="WallS" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3, 30)
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/WallS"]
+mesh = SubResource("WallMesh_H")
+material_override = SubResource("WallMat_H")
+
+[node name="Col" type="CollisionShape3D" parent="NavigationRegion3D/WallS"]
+shape = SubResource("WallShape_H")
+
+[node name="WallE" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 3, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/WallE"]
+mesh = SubResource("WallMeshSide_H")
+material_override = SubResource("WallMat_H")
+
+[node name="Col" type="CollisionShape3D" parent="NavigationRegion3D/WallE"]
+shape = SubResource("WallShapeSide_H")
+
+[node name="WallW" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -30, 3, 0)
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/WallW"]
+mesh = SubResource("WallMeshSide_H")
+material_override = SubResource("WallMat_H")
+
+[node name="Col" type="CollisionShape3D" parent="NavigationRegion3D/WallW"]
+shape = SubResource("WallShapeSide_H")
+
+; --- Paredes interiores en cruz para crear pasillos ---
+[node name="InnerWallH" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(0.5, 0, 0, 0, 1, 0, 0, 0, 1, -8, 3, -8)
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/InnerWallH"]
+mesh = SubResource("WallMesh_H")
+material_override = SubResource("WallMat_H")
+
+[node name="Col" type="CollisionShape3D" parent="NavigationRegion3D/InnerWallH"]
+shape = SubResource("WallShape_H")
+
+[node name="InnerWallV" type="StaticBody3D" parent="NavigationRegion3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 0.5, 10, 3, 6)
+
+[node name="Mesh" type="MeshInstance3D" parent="NavigationRegion3D/InnerWallV"]
+mesh = SubResource("WallMeshSide_H")
+material_override = SubResource("WallMat_H")
+
+[node name="Col" type="CollisionShape3D" parent="NavigationRegion3D/InnerWallV"]
+shape = SubResource("WallShapeSide_H")
+
+; --- Player ---
+[node name="Player" parent="." instance=ExtResource("1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0)
+
+; --- Spawn points ---
+[node name="SpawnPoints" type="Node3D" parent="."]
+
+[node name="SP1" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 1, -22)
+
+[node name="SP2" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 1, -22)
+
+[node name="SP3" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 22, 1, 22)
+
+[node name="SP4" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -22, 1, 22)
+
+[node name="SP5" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, -25)
+
+[node name="SP6" type="Marker3D" parent="SpawnPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 25)
+
+; --- WaveSystem ---
+; El Hangar ES el modo "endless": tras la wave 3 se generan waves dinámicas
+; con scaling progresivo. El pool define qué enemy_data se permiten.
+[node name="WaveSystem" type="Node" parent="."]
+script = ExtResource("5")
+waves = Array[Resource]([SubResource("W1"), SubResource("W2"), SubResource("W3")])
+spawn_points_path = NodePath("../SpawnPoints")
+initial_delay = 4.0
+time_between_waves = 4.0
+endless_mode = true
+endless_pool = Array[Resource]([ExtResource("EG"), ExtResource("ES"), ExtResource("EH"), ExtResource("EA"), ExtResource("EB"), ExtResource("EAL")])
+
+; --- PropDecorator: hangar más denso, distinto seed ---
+[node name="PropDecorator" type="Node3D" parent="."]
+script = ExtResource("7")
+spawn_radius = 24.0
+inner_exclusion = 4.0
+prop_count = 22
+random_seed = 8642
+
+; --- HUD ---
+[node name="HUD" parent="." instance=ExtResource("2")]

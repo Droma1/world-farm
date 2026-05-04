@@ -21,6 +21,115 @@ color = Color(0.85, 0.05, 0.05, 1)
 mouse_filter = 2
 modulate = Color(1, 1, 1, 0)
 
+; Sniper scope overlay — viñeta negra fullscreen + cruz fina central.
+; Solo visible cuando el player tiene equipado un sniper Y está en ADS.
+[node name="ScopeOverlay" type="Control" parent="Root"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+visible = false
+
+[node name="ScopeBlackTop" type="ColorRect" parent="Root/ScopeOverlay"]
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_bottom = -180.0
+color = Color(0, 0, 0, 1)
+mouse_filter = 2
+
+[node name="ScopeBlackBottom" type="ColorRect" parent="Root/ScopeOverlay"]
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 180.0
+color = Color(0, 0, 0, 1)
+mouse_filter = 2
+
+[node name="ScopeBlackLeft" type="ColorRect" parent="Root/ScopeOverlay"]
+anchor_bottom = 1.0
+anchor_right = 0.5
+offset_right = -260.0
+color = Color(0, 0, 0, 1)
+mouse_filter = 2
+
+[node name="ScopeBlackRight" type="ColorRect" parent="Root/ScopeOverlay"]
+anchor_bottom = 1.0
+anchor_left = 0.5
+anchor_right = 1.0
+offset_left = 260.0
+color = Color(0, 0, 0, 1)
+mouse_filter = 2
+
+[node name="ScopeRingV" type="ColorRect" parent="Root/ScopeOverlay"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -1.0
+offset_top = -200.0
+offset_right = 1.0
+offset_bottom = 200.0
+color = Color(0, 0, 0, 1)
+mouse_filter = 2
+
+[node name="ScopeRingH" type="ColorRect" parent="Root/ScopeOverlay"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -200.0
+offset_top = -1.0
+offset_right = 200.0
+offset_bottom = 1.0
+color = Color(0, 0, 0, 1)
+mouse_filter = 2
+
+[node name="ScopeCenterDot" type="ColorRect" parent="Root/ScopeOverlay"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 2.0
+offset_bottom = 2.0
+color = Color(1, 0.3, 0.3, 1)
+mouse_filter = 2
+
+; Countdown grande entre waves (3-2-1-START, "OLEADA X").
+[node name="CountdownLabel" type="Label" parent="Root"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -300.0
+offset_top = -100.0
+offset_right = 300.0
+offset_bottom = 100.0
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 88
+modulate = Color(1, 0.85, 0.4, 1)
+text = ""
+mouse_filter = 2
+
+; Container donde el HUD instancia hit indicators direccionales (arcos rojos
+; que apuntan al enemigo que te disparó). Anclado al centro de pantalla.
+[node name="HitDirContainer" type="Control" parent="Root"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+mouse_filter = 2
+
+; Overlay glitch — visible solo en wave 6+ (Acto 3). Color cyan-magenta con
+; modulate animado por código para sensacion de simulacion fallando.
+[node name="GlitchOverlay" type="ColorRect" parent="Root"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.4, 1.0, 0.9, 0.10)
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0)
+
 [node name="EndOverlay" type="ColorRect" parent="Root"]
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -48,14 +157,15 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -250.0
-offset_top = 30.0
-offset_right = 250.0
-offset_bottom = 70.0
+offset_left = -340.0
+offset_top = 20.0
+offset_right = 340.0
+offset_bottom = 280.0
 horizontal_alignment = 1
-theme_override_font_sizes/font_size = 22
-modulate = Color(0.85, 0.85, 0.7, 1)
-text = "R: reintentar    ·    M: menú principal"
+vertical_alignment = 0
+theme_override_font_sizes/font_size = 20
+modulate = Color(0.9, 0.9, 0.85, 1)
+text = ""
 mouse_filter = 2
 
 [node name="Crosshair" type="Control" parent="Root"]
@@ -224,6 +334,18 @@ value = 100.0
 show_percentage = false
 mouse_filter = 2
 
+[node name="StaminaBar" type="ProgressBar" parent="Root/HealthPanel"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -6.0
+offset_bottom = 0.0
+max_value = 100.0
+value = 100.0
+show_percentage = false
+modulate = Color(0.55, 0.95, 1, 0.8)
+mouse_filter = 2
+
 [node name="WavePanel" type="Control" parent="Root"]
 anchor_left = 0.5
 anchor_right = 0.5
@@ -283,6 +405,20 @@ theme_override_font_sizes/font_size = 44
 text = "30 / 90"
 mouse_filter = 2
 
+[node name="GrenadeLabel" type="Label" parent="Root/AmmoPanel"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -52.0
+offset_right = -8.0
+offset_bottom = -28.0
+horizontal_alignment = 2
+vertical_alignment = 2
+theme_override_font_sizes/font_size = 18
+modulate = Color(1, 0.55, 0.25, 1)
+text = "G  x2"
+mouse_filter = 2
+
 [node name="ReloadLabel" type="Label" parent="Root/AmmoPanel"]
 anchor_top = 1.0
 anchor_right = 1.0
@@ -295,6 +431,95 @@ modulate = Color(1, 0.7, 0.3, 1)
 text = "RECARGANDO..."
 mouse_filter = 2
 visible = false
+
+; ============================================================
+;  Boss bar — visible solo cuando hay un ALPHA vivo
+; ============================================================
+[node name="BossPanel" type="Control" parent="Root"]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -260.0
+offset_top = 100.0
+offset_right = 260.0
+offset_bottom = 150.0
+mouse_filter = 2
+visible = false
+
+[node name="BossLabel" type="Label" parent="Root/BossPanel"]
+anchor_right = 1.0
+offset_bottom = 22.0
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 18
+modulate = Color(1, 0.55, 0.20, 1)
+text = "PUMA ALPHA"
+mouse_filter = 2
+
+[node name="BossBar" type="ProgressBar" parent="Root/BossPanel"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -16.0
+max_value = 280.0
+value = 280.0
+show_percentage = false
+modulate = Color(1, 0.4, 0.4, 1)
+mouse_filter = 2
+
+; ============================================================
+;  Hacking — barra horizontal centro-arriba (Acto 2)
+; ============================================================
+[node name="HackPanel" type="Control" parent="Root"]
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 64.0
+offset_right = 200.0
+offset_bottom = 96.0
+mouse_filter = 2
+visible = false
+
+[node name="HackLabel" type="Label" parent="Root/HackPanel"]
+anchor_right = 1.0
+offset_bottom = 18.0
+horizontal_alignment = 1
+theme_override_font_sizes/font_size = 14
+modulate = Color(0.55, 0.95, 1, 1)
+text = "N.O.A. - HACKEO EN PROGRESO  0%"
+mouse_filter = 2
+
+[node name="HackBar" type="ProgressBar" parent="Root/HackPanel"]
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -10.0
+max_value = 100.0
+value = 0.0
+show_percentage = false
+modulate = Color(0.55, 0.95, 1, 1)
+mouse_filter = 2
+
+; ============================================================
+;  N.O.A — caja de dialogo radio (esquina inferior centro)
+; ============================================================
+[node name="NoaPanel" type="PanelContainer" parent="Root"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -340.0
+offset_top = -130.0
+offset_right = 340.0
+offset_bottom = -94.0
+mouse_filter = 2
+modulate = Color(1, 1, 1, 0.92)
+
+[node name="NoaLabel" type="Label" parent="Root/NoaPanel"]
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 17
+modulate = Color(0.55, 0.95, 1, 1)
+text = ""
+mouse_filter = 2
 
 ; ============================================================
 ;  PAUSE MENU — process_mode ALWAYS para responder paused
@@ -355,6 +580,34 @@ min_value = 0.0
 max_value = 1.0
 step = 0.01
 value = 0.8
+
+[node name="MusicRow" type="HBoxContainer" parent="PauseMenu/Container"]
+
+[node name="MusicLabel" type="Label" parent="PauseMenu/Container/MusicRow"]
+custom_minimum_size = Vector2(160, 0)
+text = "Volumen musica"
+theme_override_font_sizes/font_size = 18
+
+[node name="MusicSlider" type="HSlider" parent="PauseMenu/Container/MusicRow"]
+custom_minimum_size = Vector2(240, 0)
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.7
+
+[node name="SfxRow" type="HBoxContainer" parent="PauseMenu/Container"]
+
+[node name="SfxLabel" type="Label" parent="PauseMenu/Container/SfxRow"]
+custom_minimum_size = Vector2(160, 0)
+text = "Volumen efectos"
+theme_override_font_sizes/font_size = 18
+
+[node name="SfxSlider" type="HSlider" parent="PauseMenu/Container/SfxRow"]
+custom_minimum_size = Vector2(240, 0)
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 1.0
 
 [node name="Spacer" type="Control" parent="PauseMenu/Container"]
 custom_minimum_size = Vector2(0, 12)

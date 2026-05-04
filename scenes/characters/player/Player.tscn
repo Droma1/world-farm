@@ -8,6 +8,8 @@
 [ext_resource type="Script" path="res://scripts/components/WeaponVFX.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/components/HumanoidAnimator.gd" id="7"]
 [ext_resource type="PackedScene" path="res://assets/models/characters/capibara_player_rigged.glb" id="8"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/Grenade.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://scenes/weapons/ThrownKnife.tscn" id="10"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_1"]
 height = 1.85
@@ -16,6 +18,8 @@ radius = 0.42
 [node name="Player" type="CharacterBody3D"]
 script = ExtResource("1")
 data = ExtResource("5")
+grenade_scene = ExtResource("9")
+thrown_knife_scene = ExtResource("10")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.925, 0)

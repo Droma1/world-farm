@@ -1,0 +1,34 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/entities/WeaponPickup.gd" id="1"]
+
+[sub_resource type="SphereShape3D" id="WPShape"]
+radius = 0.7
+
+[sub_resource type="BoxMesh" id="WPMesh"]
+size = Vector3(0.45, 0.10, 0.10)
+
+[sub_resource type="StandardMaterial3D" id="WPMat"]
+shading_mode = 0
+albedo_color = Color(0.85, 0.55, 0.20, 1)
+emission_enabled = true
+emission = Color(1, 0.6, 0.2, 1)
+emission_energy_multiplier = 2.5
+
+[node name="WeaponPickup" type="Area3D"]
+script = ExtResource("1")
+collision_layer = 0
+collision_mask = 1
+monitorable = false
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="."]
+shape = SubResource("WPShape")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+mesh = SubResource("WPMesh")
+material_override = SubResource("WPMat")
+
+[node name="Light" type="OmniLight3D" parent="."]
+light_color = Color(1, 0.6, 0.2, 1)
+light_energy = 1.5
+omni_range = 3.0

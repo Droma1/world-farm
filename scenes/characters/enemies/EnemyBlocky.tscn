@@ -11,6 +11,9 @@
 [ext_resource type="PackedScene" path="res://assets/models/characters/blocky/character-d.glb" id="9"]
 [ext_resource type="PackedScene" path="res://scenes/world/HealthPickup.tscn" id="10"]
 [ext_resource type="PackedScene" path="res://scenes/world/AmmoPickup.tscn" id="11"]
+[ext_resource type="PackedScene" path="res://scenes/world/SpeedPickup.tscn" id="12"]
+[ext_resource type="PackedScene" path="res://scenes/world/ArmorPickup.tscn" id="13"]
+[ext_resource type="PackedScene" path="res://scenes/world/WeaponPickup.tscn" id="14"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_B"]
 radius = 0.32
@@ -21,6 +24,9 @@ script = ExtResource("1")
 data = ExtResource("6")
 health_pickup_scene = ExtResource("10")
 ammo_pickup_scene = ExtResource("11")
+speed_pickup_scene = ExtResource("12")
+armor_pickup_scene = ExtResource("13")
+weapon_pickup_scene = ExtResource("14")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)

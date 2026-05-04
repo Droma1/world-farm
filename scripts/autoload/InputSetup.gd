@@ -12,6 +12,10 @@ func _ready() -> void:
 	_add_key(&"crouch", KEY_CTRL)
 	_add_key(&"reload", KEY_R)
 	_add_key(&"zoom_reset", KEY_X)
+	_add_key(&"throw_grenade", KEY_G)
+	_add_key(&"throw_smoke", KEY_T)
+	_add_key(&"throw_flash", KEY_F)
+	_add_key(&"quick_melee", KEY_V)
 	_add_mouse(&"fire", MOUSE_BUTTON_LEFT)
 	_add_mouse(&"aim", MOUSE_BUTTON_RIGHT)
 

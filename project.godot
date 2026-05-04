@@ -24,6 +24,10 @@ Settings="*res://scripts/autoload/Settings.gd"
 InputSetup="*res://scripts/autoload/InputSetup.gd"
 AudioManager="*res://scripts/autoload/AudioManager.gd"
 DamageNumbers="*res://scripts/systems/vfx/DamageNumbers.gd"
+NoaDialog="*res://scripts/systems/ui/NoaDialog.gd"
+HackingSystem="*res://scripts/systems/ui/HackingSystem.gd"
+Achievements="*res://scripts/systems/Achievements.gd"
+Codex="*res://scripts/systems/Codex.gd"
 
 [filesystem]
 
